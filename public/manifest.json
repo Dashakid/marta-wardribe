@@ -1,1 +1,16 @@
 
+{
+  "name": "Marta's Wardrobe",
+  "short_name": "Wardrobe",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf9f7",
+  "theme_color": "#faf9f7",
+  "icons": [
+    {
+      "src": "https://fav.farm/👗",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
