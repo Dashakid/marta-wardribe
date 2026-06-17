@@ -1,16 +1,26 @@
 
 {
-  "name": "Marta's Wardrobe",
-  "short_name": "Wardrobe",
+  "name": "Pintona",
+  "short_name": "Pintona",
+  "description": "Tu look de hoy, con IA.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#faf9f7",
   "theme_color": "#faf9f7",
   "icons": [
     {
       "src": "https://fav.farm/👗",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://fav.farm/👗",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

@@ -1,0 +1,24 @@
+{
+  "name": "marta-wardribe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dashakid/marta-wardribe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Dashakid/marta-wardribe/issues"
+  },
+  "homepage": "https://github.com/Dashakid/marta-wardribe#readme",
+  "dependencies": {
+    "firebase": "^12.13.0"
+  }
+}

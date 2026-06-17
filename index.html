@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Marta's Wardrobe">
-  <title>Marta's Wardrobe</title>
+  <meta name="apple-mobile-web-app-title" content="Pintona">
+  <link rel="manifest" href="/manifest.json">
+  <title>Pintona</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -31,6 +32,7 @@
     .cloth-check { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; background: #1a1a1a; border-radius: 50%; display: none; align-items: center; justify-content: center; }
     .cloth-card.selected .cloth-check { display: flex; }
     .cloth-check svg { width: 10px; height: 10px; }
+    .cloth-card-delete { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; background: rgba(0,0,0,0.45); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; padding: 0; }
     .upload-card { aspect-ratio: 3/4; border-radius: 10px; border: 0.5px dashed #bbb; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #bbb; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif; }
     .upload-plus { font-size: 26px; font-weight: 200; line-height: 1; color: #bbb; }
     .analyzing-overlay { position: absolute; inset: 0; background: rgba(250,249,247,0.8); display: flex; align-items: center; justify-content: center; border-radius: 10px; }
@@ -47,59 +49,369 @@
     .feedback { margin-top: 14px; background: #fff; border: 0.5px solid #e0ddd8; border-radius: 10px; padding: 14px; font-size: 13px; line-height: 1.65; color: #555; }
     .feedback.loading { display: flex; align-items: center; gap: 10px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; color: #aaa; }
     .score { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; font-style: italic; display: block; margin-bottom: 6px; color: #1a1a1a; }
+    /* ─── Vibe picker ─── */
+    .vibe-row { margin-top: 14px; }
+    .vibe-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; margin-bottom: 7px; }
+    .vibe-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .vibe-chip { font-size: 11px; letter-spacing: 0.05em; padding: 5px 11px; border: 0.5px solid #ccc; background: transparent; color: #888; border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; white-space: nowrap; }
+    .vibe-chip.active { background: #1a1a1a; color: #faf9f7; border-color: #1a1a1a; }
+    /* ─── Profile icon button ─── */
+    .profile-btn { background: none; border: none; cursor: pointer; color: #ccc; padding: 4px; display: flex; align-items: center; transition: color 0.15s; }
+    .profile-btn:hover { color: #1a1a1a; }
+    /* ─── Profile sheet ─── */
+    #profile-sheet { position: absolute; inset: 0; z-index: 15; background: #faf9f7; display: flex; flex-direction: column; overflow-y: auto; }
+    #profile-sheet[hidden] { display: none; }
+    .profile-sheet-header { padding: 56px 20px 14px; border-bottom: 0.5px solid #e0ddd8; display: flex; align-items: center; }
+    .profile-sheet-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; font-style: italic; flex: 1; }
+    .profile-sheet-close { background: none; border: none; cursor: pointer; font-size: 24px; color: #bbb; padding: 4px; line-height: 1; }
+    .profile-sheet-body { padding: 16px; flex: 1; }
+    .profile-sheet-sub { font-size: 10px; color: #aaa; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+    .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .profile-slot { aspect-ratio: 3/4; border-radius: 10px; overflow: hidden; position: relative; }
+    .profile-slot.empty { border: 0.5px dashed #bbb; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .profile-slot.filled img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .profile-slot-remove { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; background: rgba(0,0,0,0.45); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; padding: 0; }
+    /* ─── Onboarding overlay ─── */
+    #onboarding-overlay { position: fixed; inset: 0; z-index: 55; background: #faf9f7; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+    #onboarding-overlay[hidden] { display: none; }
+    .onb-wrap { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; }
+    .onb-dots { display: flex; gap: 6px; margin-bottom: 32px; }
+    .onb-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: background 0.2s; }
+    .onb-dot.active { background: #1a1a1a; }
+    .onb-step { display: none; width: 100%; flex-direction: column; align-items: center; text-align: center; }
+    .onb-step.active { display: flex; }
+    .onb-icon { font-size: 32px; margin-bottom: 16px; line-height: 1; }
+    .onb-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; font-style: italic; margin-bottom: 8px; color: #1a1a1a; }
+    .onb-sub { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 6px; max-width: 280px; }
+    .onb-hint { font-size: 11px; color: #bbb; letter-spacing: 0.05em; margin-bottom: 24px; }
+    .onb-grid { width: 100%; margin-bottom: 20px; text-align: left; }
+    .onb-btn { width: 100%; padding: 14px; font-family: 'Cormorant Garamond', serif; font-size: 17px; font-style: italic; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 10px; cursor: pointer; letter-spacing: 0.03em; margin-bottom: 10px; }
+    .onb-skip { background: none; border: none; font-size: 11px; color: #bbb; cursor: pointer; font-family: 'DM Sans', sans-serif; letter-spacing: 0.07em; text-transform: uppercase; padding: 4px; }
     .spinner { width: 16px; height: 16px; border: 1.5px solid #ddd; border-top-color: #888; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
     input[type="file"] { display: none; }
+    /* ─── App wrapper ─── */
+    #app { display: flex; flex-direction: column; flex: 1; position: relative; }
+    /* ─── Login screen ─── */
+    #login-screen { position: fixed; inset: 0; z-index: 50; background: #faf9f7; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    #login-screen[hidden] { display: none; }
+    .login-card { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 320px; width: 100%; }
+    .login-logo { margin-bottom: 28px; }
+    .login-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; font-style: italic; margin-bottom: 8px; }
+    .login-sub { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; margin-bottom: 40px; }
+    .login-google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px 20px; background: #fff; border: 0.5px solid #ddd; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; color: #1a1a1a; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+    .login-google-btn:hover { border-color: #bbb; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .login-google-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .login-error { margin-top: 14px; font-size: 12px; color: #c0392b; min-height: 18px; }
+    /* ─── Login entrance animation ─── */
+    @keyframes pintonaDraw {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes pintonaFadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    /* 1 — crown peak  (~50 units) */
+    .login-logo svg g > *:nth-child(1) {
+      stroke-dasharray: 52; stroke-dashoffset: 52;
+      animation: pintonaDraw 0.45s cubic-bezier(0.4,0,0.2,1) 0.1s both;
+    }
+    /* 2 — top crossbar (~22 units) */
+    .login-logo svg g > *:nth-child(2) {
+      stroke-dasharray: 24; stroke-dashoffset: 24;
+      animation: pintonaDraw 0.2s cubic-bezier(0.4,0,0.2,1) 0.55s both;
+    }
+    /* 3 — vertical drop (~11 units) */
+    .login-logo svg g > *:nth-child(3) {
+      stroke-dasharray: 13; stroke-dashoffset: 13;
+      animation: pintonaDraw 0.15s cubic-bezier(0.4,0,0.2,1) 0.75s both;
+    }
+    /* 4 — left arm sweeps out (~58 units) */
+    .login-logo svg g > *:nth-child(4) {
+      stroke-dasharray: 62; stroke-dashoffset: 62;
+      animation: pintonaDraw 0.4s cubic-bezier(0.4,0,0.2,1) 0.9s both;
+    }
+    /* 5 — right arm sweeps out simultaneously */
+    .login-logo svg g > *:nth-child(5) {
+      stroke-dasharray: 62; stroke-dashoffset: 62;
+      animation: pintonaDraw 0.4s cubic-bezier(0.4,0,0.2,1) 0.9s both;
+    }
+    /* 6 — base bar slides across (~84 units) */
+    .login-logo svg g > *:nth-child(6) {
+      stroke-dasharray: 86; stroke-dashoffset: 86;
+      animation: pintonaDraw 0.35s cubic-bezier(0.4,0,0.2,1) 1.3s both;
+    }
+    .login-title     { animation: pintonaFadeUp 0.5s ease 1.7s  both; }
+    .login-sub       { animation: pintonaFadeUp 0.5s ease 1.85s both; }
+    .login-google-btn{ animation: pintonaFadeUp 0.5s ease 2.0s  both; }
+    /* ─── Header user area ─── */
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    #user-name { font-size: 11px; color: #888; }
+    #sign-out-btn { background: none; border: none; cursor: pointer; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #bbb; font-family: 'DM Sans', sans-serif; padding: 4px 0; transition: color 0.15s; }
+    #sign-out-btn:hover { color: #1a1a1a; }
+    /* ─── Globe button ─── */
+    .globe-btn { background: none; border: none; cursor: pointer; color: #ccc; padding: 4px; display: flex; align-items: center; transition: color 0.15s; }
+    .globe-btn:hover { color: #1a1a1a; }
+    /* ─── Language selection screen ─── */
+    #lang-screen { position: fixed; inset: 0; z-index: 60; background: #faf9f7; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    #lang-screen[hidden] { display: none; }
+    .lang-screen-card { display: flex; flex-direction: column; align-items: center; max-width: 300px; width: 100%; }
+    .lang-screen-mark { margin-bottom: 24px; }
+    .lang-screen-title { font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-style: italic; color: #1a1a1a; margin-bottom: 10px; }
+    .lang-screen-sub { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; margin-bottom: 28px; }
+    /* ─── Language buttons (shared by screen + modal) ─── */
+    .lang-btn { width: 100%; height: 48px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 14px; font-family: 'DM Sans', sans-serif; color: #1a1a1a; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+    .lang-btn + .lang-btn { margin-top: 8px; }
+    .lang-btn:hover { border-color: #bbb; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    /* ─── In-app language modal ─── */
+    #lang-modal-overlay { position: absolute; inset: 0; z-index: 20; background: rgba(250,249,247,0.96); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    #lang-modal-overlay[hidden] { display: none; }
+    .lang-modal { background: #fff; border: 0.5px solid #e0ddd8; border-radius: 16px; padding: 24px 20px; width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: 8px; }
+    .lang-modal-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; text-align: center; margin-bottom: 6px; }
+    /* ─── Board view ─── */
+    .board-view { padding: 16px; overflow-y: auto; flex: 1; }
+    .board-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+    .board-slot { aspect-ratio: 4/5; border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; }
+    .board-slot.empty { border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #ccc; }
+    .board-slot.filled img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .board-slot.uploading { background: #f0ede8; display: flex; align-items: center; justify-content: center; }
+    .board-ghost { text-align: center; padding: 20px 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; color: #ccc; }
+    /* ─── Today view ─── */
+    .today-view { padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+    .today-header { display: flex; flex-direction: column; gap: 4px; }
+    .today-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: #1a1a1a; }
+    .today-subtitle { font-size: 11px; color: #999; letter-spacing: 0.08em; text-transform: uppercase; }
+    .today-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .today-cell { aspect-ratio: 3/4; border-radius: 9px; overflow: hidden; }
+    .today-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .today-cell.empty { background: #EDE8E1; }
+    .today-ai-note { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; color: #aaa; text-align: center; }
   </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "firebase/app":       "https://esm.sh/firebase@12.13.0/app",
+      "firebase/auth":      "https://esm.sh/firebase@12.13.0/auth",
+      "firebase/firestore": "https://esm.sh/firebase@12.13.0/firestore",
+      "firebase/storage":   "https://esm.sh/firebase@12.13.0/storage"
+    }
+  }
+  </script>
 </head>
 <body>
+<!-- ─── Language selection screen (first visit, z-index above login) ─────────── -->
+<div id="lang-screen">
+  <div class="lang-screen-card">
+    <div class="lang-screen-mark">
+      <svg viewBox="0 0 100 80" width="90" height="72" aria-hidden="true"
+           fill="none" stroke="#1a1a1a" stroke-width="1.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 36,38 L 40,25 L 50,18 L 60,25 L 64,38"/>
+        <line x1="36" y1="38" x2="64" y2="38"/>
+        <line x1="50" y1="38" x2="50" y2="46"/>
+        <path d="M 50,46 C 34,47 18,56 10,70"/>
+        <path d="M 50,46 C 66,47 82,56 90,70"/>
+        <line x1="10" y1="70" x2="90" y2="70"/>
+      </svg>
+    </div>
+    <p class="lang-screen-title">Pintona</p>
+    <p class="lang-screen-sub" data-i18n="langChoose">Choose language</p>
+    <button class="lang-btn" onclick="chooseLang('en')">English</button>
+    <button class="lang-btn" onclick="chooseLang('es')">Español</button>
+    <button class="lang-btn" onclick="chooseLang('vi')">Tiếng Việt</button>
+  </div>
+</div>
+<!-- ─── Login screen (visible until auth resolves) ─────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 150 88" width="96" height="58" aria-label="Pintona" style="display:block;margin:0 auto">
+        <g transform="translate(75,60)" fill="none" stroke="#1a1a1a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M -11,-22 L -7,-35 L 0,-42 L 7,-35 L 11,-22"/>
+          <line x1="-11" y1="-22" x2="11" y2="-22"/>
+          <line x1="0" y1="-22" x2="0" y2="-11"/>
+          <path d="M 0,-11 C -17,-10 -34,2 -42,18"/>
+          <path d="M 0,-11 C 17,-10 34,2 42,18"/>
+          <line x1="-42" y1="18" x2="42" y2="18"/>
+        </g>
+      </svg>
+    </div>
+    <h1 class="login-title">Pintona</h1>
+    <p class="login-sub" data-i18n="loginTagline">Tu look de hoy, con IA</p>
+    <button id="sign-in-btn" class="login-google-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      <span data-i18n="loginButton">Continue with Google</span>
+    </button>
+    <p id="login-error" class="login-error" role="alert"></p>
+  </div>
+</div>
+
+<!-- ─── Onboarding overlay (fixed, z-index 55, shown once on first login) ─── -->
+<div id="onboarding-overlay" hidden>
+  <div class="onb-wrap">
+    <div class="onb-dots">
+      <div class="onb-dot active" id="onbDot0"></div>
+      <div class="onb-dot" id="onbDot1"></div>
+      <div class="onb-dot" id="onbDot2"></div>
+    </div>
+    <!-- Step 0: Welcome -->
+    <div class="onb-step active" id="onbStep0">
+      <div class="onb-icon">✦</div>
+      <div class="onb-title" data-i18n="onbWelcomeTitle">Welcome to Pintona</div>
+      <div class="onb-sub" data-i18n="onbWelcomeSub">Your AI-powered personal stylist</div>
+      <div style="margin-bottom:28px;"></div>
+      <button class="onb-btn" onclick="nextOnboardingStep(1)" data-i18n="onbNext">Get started</button>
+    </div>
+    <!-- Step 1: Upload style images -->
+    <div class="onb-step" id="onbStep1">
+      <div class="onb-title" data-i18n="onbStyleTitle">What’s your style?</div>
+      <div class="onb-sub" data-i18n="onbStyleSub">Upload 1–5 looks you love</div>
+      <div class="onb-hint" data-i18n="onbStyleHint">These train your personal AI stylist</div>
+      <div class="profile-grid onb-grid" id="onbStyleGrid"></div>
+      <button class="onb-btn" onclick="nextOnboardingStep(2)" data-i18n="onbDone">Done</button>
+      <button class="onb-skip" onclick="nextOnboardingStep(2)" data-i18n="onbSkip">Skip for now</button>
+    </div>
+    <!-- Step 2: Ready -->
+    <div class="onb-step" id="onbStep2">
+      <div class="onb-icon">✦</div>
+      <div class="onb-title" data-i18n="onbReadyTitle">You’re all set</div>
+      <div class="onb-sub" data-i18n="onbReadySub">Your AI style coach is ready</div>
+      <div style="margin-bottom:28px;"></div>
+      <button class="onb-btn" onclick="completeOnboarding()" data-i18n="onbEnter">Enter Pintona</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Main app (hidden until authenticated) ──────────────────────────────── -->
+<div id="app" hidden>
+<!-- ─── Profile sheet (absolute overlay inside #app) ──────────────────────── -->
+<div id="profile-sheet" hidden>
+  <div class="profile-sheet-header">
+    <span class="profile-sheet-title" data-i18n="profileTitle">Style Profile</span>
+    <button class="profile-sheet-close" onclick="closeProfileSheet()" aria-label="Close">×</button>
+  </div>
+  <div class="profile-sheet-body">
+    <div class="profile-sheet-sub" data-i18n="profileSub">Your fashion references</div>
+    <div class="profile-grid" id="profileGrid"></div>
+  </div>
+</div>
+<!-- ─── In-app language modal (absolute overlay inside #app) ──────────────── -->
+<div id="lang-modal-overlay" hidden
+     onclick="if(event.target===this)document.getElementById('lang-modal-overlay').hidden=true">
+  <div class="lang-modal">
+    <p class="lang-modal-title" data-i18n="langChoose">Choose language</p>
+    <button class="lang-btn" onclick="pickLang('en')">English</button>
+    <button class="lang-btn" onclick="pickLang('es')">Español</button>
+    <button class="lang-btn" onclick="pickLang('vi')">Tiếng Việt</button>
+  </div>
+</div>
 <div class="header">
-  <h1>Marta's Wardrobe</h1>
-  <span>Virtual styling</span>
+  <h1>Pintona</h1>
+  <span data-i18n="closetSubtitle">Tu look</span>
+  <div class="header-right">
+    <span id="user-name"></span>
+    <button class="profile-btn" onclick="openProfileSheet()" aria-label="Style profile">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <circle cx="8" cy="5.5" r="2.75"/>
+        <path d="M2.5 14c0-3 2.46-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/>
+      </svg>
+    </button>
+    <button class="globe-btn" onclick="openLangModal()" aria-label="Change language">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.5"/>
+        <path d="M8 1.5C8 1.5 5.5 4 5.5 8s2.5 6.5 2.5 6.5"/>
+        <path d="M8 1.5C8 1.5 10.5 4 10.5 8s-2.5 6.5-2.5 6.5"/>
+        <line x1="1.5" y1="8" x2="14.5" y2="8"/>
+        <path d="M2 5.5h12M2 10.5h12"/>
+      </svg>
+    </button>
+    <button id="sign-out-btn" data-i18n="signOut">Sign out</button>
+  </div>
 </div>
 <input type="file" id="fileInput" accept="image/*">
+<input type="file" id="boardFileInput" accept="image/*">
+<input type="file" id="styleFileInput" accept="image/*">
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('wardrobe', this)">Wardrobe</button>
-  <button class="tab" onclick="switchTab('outfit', this)">Outfit</button>
+  <button class="tab active" onclick="switchTab('wardrobe', this)" data-i18n="tabWardrobe">Wardrobe</button>
+  <button class="tab" onclick="switchTab('outfit', this)" data-i18n="tabOutfit">Outfit</button>
+  <button class="tab" onclick="switchTab('board', this)" data-i18n="tabBoard">Board</button>
+  <button class="tab" onclick="switchTab('today', this)" data-i18n="tabToday">Today</button>
 </div>
 <div class="view active" id="view-wardrobe">
   <div class="cats">
-    <button class="cat-btn active" onclick="setCategory('all', this)">All</button>
-    <button class="cat-btn" onclick="setCategory('top', this)">Tops</button>
-    <button class="cat-btn" onclick="setCategory('bottom', this)">Bottoms</button>
-    <button class="cat-btn" onclick="setCategory('dress', this)">Dresses</button>
-    <button class="cat-btn" onclick="setCategory('outerwear', this)">Outerwear</button>
-    <button class="cat-btn" onclick="setCategory('shoes', this)">Shoes</button>
-    <button class="cat-btn" onclick="setCategory('accessory', this)">Accessories</button>
+    <button class="cat-btn active" onclick="setCategory('all', this)" data-i18n="catAll">All</button>
+    <button class="cat-btn" onclick="setCategory('top', this)" data-i18n="catTops">Tops</button>
+    <button class="cat-btn" onclick="setCategory('bottom', this)" data-i18n="catBottoms">Bottoms</button>
+    <button class="cat-btn" onclick="setCategory('dress', this)" data-i18n="catDresses">Dresses</button>
+    <button class="cat-btn" onclick="setCategory('outerwear', this)" data-i18n="catOuterwear">Outerwear</button>
+    <button class="cat-btn" onclick="setCategory('shoes', this)" data-i18n="catShoes">Shoes</button>
+    <button class="cat-btn" onclick="setCategory('accessory', this)" data-i18n="catAccessories">Accessories</button>
   </div>
   <div class="clothes-grid" id="clothesGrid"></div>
 </div>
 <div class="view" id="view-outfit">
   <div class="outfit-view">
     <div id="outfitSlots"></div>
-    <button class="rate-btn" id="rateBtn" onclick="rateOutfit()" disabled>Rate this look ✦</button>
+    <div class="vibe-row">
+      <div class="vibe-label" data-i18n="vibeLabel">Style vibe</div>
+      <div class="vibe-chips" id="vibeChips"></div>
+    </div>
+    <button class="rate-btn" id="rateBtn" onclick="rateOutfit()" disabled data-i18n="rateLook">Rate this look ✦</button>
     <div id="feedbackBox" class="feedback" style="display:none;"></div>
   </div>
 </div>
-<script>
-const GEMINI_KEY = 'PASTE_YOUR_KEY_HERE';
+<div class="view" id="view-board">
+  <div class="board-view">
+    <div class="board-grid" id="boardGrid"></div>
+    <p class="board-ghost" id="boardGhost" data-i18n="boardEmpty">Save outfits to see them here</p>
+  </div>
+</div>
+<div class="view" id="view-today">
+  <div class="today-view">
+    <div class="today-header">
+      <span class="today-title" data-i18n="todayTitle">Today</span>
+      <span class="today-subtitle" data-i18n="todaySubtitle">Your daily look</span>
+    </div>
+    <div class="today-grid" id="todayGrid"></div>
+    <!-- TODO: AI — replace with Gemini observation from board images + wardrobe items when AI integration is added -->
+    <p class="today-ai-note" data-i18n="todayAiNote">AI-powered suggestion</p>
+    <button class="rate-btn" onclick="shuffleToday()" data-i18n="todayShuffle">Shuffle</button>
+  </div>
+</div>
+</div><!-- /#app -->
+<script type="module">
+import { t, lang, setLang } from './i18n.js';
+import { storage, currentUid, db } from './firebase.js';
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { doc, getDoc, setDoc, deleteDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
 const CATS = ['top','bottom','dress','outerwear','shoes','accessory'];
 const ORDER = ['outerwear','top','dress','bottom','shoes','accessory'];
-let items = JSON.parse(localStorage.getItem('marta_items') || '[]');
+let items = [];
+let wardrobeLoading = false;
 let outfit = JSON.parse(localStorage.getItem('marta_outfit') || '{}');
 let activeCategory = 'all';
 
+// ─── Style Profile state ─────────────────────────────────────────────────────
+let styleProfile = []; // [{id, src}]
+const STYLE_MAX = 5;
+
 function save() {
-  localStorage.setItem('marta_items', JSON.stringify(items));
   localStorage.setItem('marta_outfit', JSON.stringify(outfit));
 }
 
 function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('view-' + name).classList.add('active');
   if (name === 'outfit') renderOutfit();
+  if (name === 'board')  renderBoard();
+  if (name === 'today')  renderToday();
 }
 
 function setCategory(cat, btn) {
@@ -111,12 +423,19 @@ function setCategory(cat, btn) {
 
 function renderGrid() {
   const grid = document.getElementById('clothesGrid');
-  const visible = activeCategory === 'all' ? items : items.filter(i => i.category === activeCategory);
   grid.innerHTML = '';
+  if (wardrobeLoading) {
+    const spinner = document.createElement('div');
+    spinner.className = 'upload-card';
+    spinner.innerHTML = '<div class="spinner"></div>';
+    grid.appendChild(spinner);
+    return;
+  }
+  const visible = activeCategory === 'all' ? items : items.filter(i => i.category === activeCategory);
   const addCard = document.createElement('button');
   addCard.className = 'upload-card';
   addCard.onclick = () => document.getElementById('fileInput').click();
-  addCard.innerHTML = '<span class="upload-plus">+</span><span>Add piece</span>';
+  addCard.innerHTML = '<span class="upload-plus">+</span><span>' + t('addPiece') + '</span>';
   grid.appendChild(addCard);
   visible.forEach(item => {
     const card = document.createElement('div');
@@ -128,6 +447,12 @@ function renderGrid() {
       ov.className = 'analyzing-overlay';
       ov.innerHTML = '<div class="spinner"></div>';
       card.appendChild(ov);
+    } else {
+      const del = document.createElement('button');
+      del.className = 'cloth-card-delete';
+      del.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg>';
+      del.onclick = e => { e.stopPropagation(); removeItem(item.id); };
+      card.appendChild(del);
     }
     grid.appendChild(card);
   });
@@ -149,7 +474,7 @@ function renderOutfit() {
   const panel = document.getElementById('outfitSlots');
   panel.innerHTML = '';
   const hasItem = ORDER.some(c => outfit[c]);
-  if (!hasItem) { panel.innerHTML = '<div class="outfit-empty">Select pieces from your wardrobe to build a look</div>'; }
+  if (!hasItem) { panel.innerHTML = '<div class="outfit-empty">' + t('outfitEmpty') + '</div>'; }
   else {
     ORDER.forEach(cat => {
       if (!outfit[cat]) return;
@@ -165,57 +490,216 @@ function renderOutfit() {
 
 function removeSlot(cat) { delete outfit[cat]; save(); renderOutfit(); renderGrid(); }
 
-async function callGemini(prompt, imageBase64, mimeType) {
-  const parts = [];
-  if (imageBase64) parts.push({ inlineData: { mimeType: mimeType || 'image/jpeg', data: imageBase64 } });
-  parts.push({ text: prompt });
-  const resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_KEY, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: [{ parts }] })
-  });
-  const data = await resp.json();
+// TODO: AI
+async function callGemini(prompt, imageBase64 = null, mimeType = null, imageUrls = [], timeout = 15000) {
+  const body = { prompt };
+  if (imageBase64) { body.imageBase64 = imageBase64; body.mimeType = mimeType; }
+  if (imageUrls && imageUrls.length) { body.imageUrls = imageUrls; }
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  let res;
+  try {
+    res = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+  if (!res.ok) throw new Error('Gemini proxy error');
+  const data = await res.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+// Resize + compress image to max 1500px, JPEG 85% — handles large iPhone photos
+async function compressImage(file, maxDim = 1500, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    // Fallback for HEIC or any format the browser canvas can't decode
+    function fallback() {
+      const reader = new FileReader();
+      reader.onload = ev => resolve({
+        blob: file,
+        base64: ev.target.result.split(',')[1],
+        mimeType: file.type || 'image/jpeg'
+      });
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    }
+
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+        else { width = Math.round(width * maxDim / height); height = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => {
+        if (!blob) { fallback(); return; }
+        const reader = new FileReader();
+        reader.onload = ev => resolve({ blob, base64: ev.target.result.split(',')[1], mimeType: 'image/jpeg' });
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); fallback(); };
+    img.src = url;
+  });
+}
+
+// TODO: AI
+async function removeBackground(imageBase64) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
+  let res;
+  try {
+    res = await fetch('/api/removebg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64 }),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+  if (!res.ok) throw new Error('remove.bg proxy error');
+  return res.blob();
 }
 
 document.getElementById('fileInput').addEventListener('change', async e => {
   const file = e.target.files[0];
-  if (!file) return;
+  if (!file || !currentUid) { e.target.value = ''; return; }
   e.target.value = '';
-  const reader = new FileReader();
-  reader.onload = async ev => {
-    const src = ev.target.result;
-    const base64 = src.split(',')[1];
-    const mimeType = file.type || 'image/jpeg';
-    const tempId = Date.now();
-    items.unshift({ id: tempId, src, name: '...', category: 'top', analyzing: true });
-    renderGrid();
+
+  const tempId = Date.now();
+
+  // Show spinner immediately while upload + classification runs
+  items.unshift({ id: tempId, src: '', name: '...', category: 'top', analyzing: true });
+  renderGrid();
+
+  try {
+    // 1. Compress image (handles large iPhone photos)
+    const { blob: compressedBlob, base64, mimeType } = await compressImage(file);
+
+    // 2. Try background removal; fall back to original image on failure
+    let uploadBlob = compressedBlob;
+    let uploadMimeType = mimeType;
     try {
-      const text = await callGemini('Categorize this clothing item. Reply ONLY with JSON: {"name":"short name 2-4 words","category":"top|bottom|dress|outerwear|shoes|accessory"}. No markdown.', base64, mimeType);
-      let parsed = { name: 'Item', category: 'top' };
-      try { parsed = JSON.parse(text.replace(/```json|```/g, '').trim()); } catch {}
-      if (!CATS.includes(parsed.category)) parsed.category = 'top';
-      const idx = items.findIndex(i => i.id === tempId);
-      if (idx !== -1) items[idx] = { id: tempId, src, name: parsed.name, category: parsed.category, analyzing: false };
-    } catch {
-      const idx = items.findIndex(i => i.id === tempId);
-      if (idx !== -1) items[idx].analyzing = false;
+      uploadBlob = await removeBackground(base64);
+      uploadMimeType = 'image/png';
+    } catch (err) {
+      console.error('Background removal failed, uploading original:', err?.code, err?.message, err);
     }
-    save(); renderGrid();
-  };
-  reader.readAsDataURL(file);
+
+    // 3. Upload image to Firebase Storage
+    const itemRef = storageRef(storage, `users/${currentUid}/items/${tempId}`);
+    await uploadBytes(itemRef, uploadBlob, { contentType: uploadMimeType });
+    const downloadURL = await getDownloadURL(itemRef);
+
+    // 4. Persist item immediately so upload never waits on AI analysis
+    items = items.filter(i => i.id !== tempId);
+    addItem({ id: tempId, src: downloadURL, name: 'Item', category: 'top', analyzing: false });
+
+    // 5. Best-effort classification updates existing item when ready
+    (async () => {
+      try {
+        const text = await callGemini(
+          'Categorize this clothing item. Reply ONLY with JSON: {"name":"short name 2-4 words","category":"top|bottom|dress|outerwear|shoes|accessory"}. No markdown.',
+          base64, mimeType
+        );
+        const raw = JSON.parse(text.replace(/```json|```/g, '').trim());
+        const nextName = raw?.name || 'Item';
+        const nextCategory = CATS.includes(raw?.category) ? raw.category : 'top';
+
+        const idx = items.findIndex(i => i.id === tempId);
+        if (idx !== -1) {
+          items[idx].name = nextName;
+          items[idx].category = nextCategory;
+          renderGrid();
+        }
+
+        if (currentUid) {
+          setDoc(
+            doc(db, 'users', currentUid, 'items', String(tempId)),
+            { name: nextName, category: nextCategory },
+            { merge: true }
+          ).catch(err => console.error('Firestore classify update failed:', err));
+        }
+      } catch (err) {
+        console.error('Classification failed, using defaults:', err?.code, err?.message, err);
+      }
+    })();
+  } catch (err) {
+    console.error('Upload failed:', err?.code, err?.message, err);
+    items = items.filter(i => i.id !== tempId);
+    renderGrid();
+  }
 });
 
+// TODO: AI
+const VIBES = [
+  { key: 'minimal',    en: 'Minimal',    es: 'Minimalista', vi: 'Tối giản' },
+  { key: 'streetwear', en: 'Streetwear',  es: 'Streetwear',  vi: 'Đường phố' },
+  { key: 'elegant',    en: 'Elegant',     es: 'Elegante',    vi: 'Thanh lịch' },
+  { key: 'y2k',        en: 'Y2K',         es: 'Y2K',         vi: 'Y2K' },
+  { key: 'casual',     en: 'Casual',      es: 'Casual',      vi: 'Thường ngày' },
+  { key: 'avantgarde', en: 'Avant-garde', es: 'Vanguardista', vi: 'Tiên phong' },
+];
+let activeVibe = localStorage.getItem('pintona_vibe') || 'minimal';
+
+function renderVibeChips() {
+  const container = document.getElementById('vibeChips');
+  if (!container) return;
+  container.innerHTML = '';
+  VIBES.forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'vibe-chip' + (v.key === activeVibe ? ' active' : '');
+    btn.textContent = v[lang] || v.en;
+    btn.onclick = () => {
+      activeVibe = v.key;
+      localStorage.setItem('pintona_vibe', v.key);
+      renderVibeChips();
+    };
+    container.appendChild(btn);
+  });
+}
+renderVibeChips();
+
+// TODO: AI
 async function rateOutfit() {
   const pieces = Object.values(outfit);
   if (pieces.length < 2) return;
   const fb = document.getElementById('feedbackBox');
   fb.style.display = 'block';
   fb.className = 'feedback loading';
-  fb.innerHTML = '<div class="spinner"></div><span>Analysing the look…</span>';
+  fb.innerHTML = '<div class="spinner"></div><span>' + t('analysing') + '</span>';
+
+  const vibe = VIBES.find(v => v.key === activeVibe) || VIBES[0];
+  const vibeDesc = vibe.en;
   const desc = pieces.map(p => p.category + ': ' + p.name).join(', ');
+
+  // Style profile context
+  const styleUrls = styleProfile.filter(p => p.src).map(p => ({ url: p.src }));
+  const styleContext = styleUrls.length
+    ? 'Here are ' + styleUrls.length + ' looks that define my personal style (see attached images). '
+    : '';
+  const styleNote = styleUrls.length ? ', taking my personal style references into account' : '';
+  const prompt = styleContext + 'I am putting together a ' + vibeDesc + '-style outfit: ' + desc +
+    '. Rate it from 1-10 as a concise ' + vibeDesc + ' fashion editor' + styleNote +
+    '. Start with the score like "8/10", then give 2-3 sentences of honest feedback tailored to the ' + vibeDesc + ' aesthetic.';
+
+  // Style images first, then outfit images
+  const outfitUrls = pieces.filter(p => p.src && p.src.startsWith('http')).map(p => ({ url: p.src }));
+  const allUrls = [...styleUrls, ...outfitUrls];
+
   try {
-    const text = await callGemini('I am putting together an outfit: ' + desc + '. Rate it from 1-10 and give 2-3 sentences of honest chic fashion editor feedback. Start with the score like "8/10".');
+    const text = await callGemini(prompt, null, null, allUrls, 30000);
     const match = text.match(/(\d+)\s*\/\s*10/);
     fb.className = 'feedback';
     if (match) {
@@ -226,12 +710,363 @@ async function rateOutfit() {
     }
   } catch {
     fb.className = 'feedback';
-    fb.innerHTML = 'Could not reach the style engine. Try again.';
+    fb.innerHTML = t('styleError');
   }
+}
+
+// ─── Language screen: hide immediately if preference already stored ──────────
+if (localStorage.getItem('pintona_lang')) {
+  document.getElementById('lang-screen').hidden = true;
+}
+
+// ─── Board ──────────────────────────────────────────────────────────────────
+let board = Array(6).fill(null);
+const boardLoading = new Set();
+let boardSlotTarget = -1;
+
+function renderBoard() {
+  const grid  = document.getElementById('boardGrid');
+  const ghost = document.getElementById('boardGhost');
+  if (!grid) return;
+  grid.innerHTML = '';
+  board.forEach((url, i) => {
+    const slot = document.createElement('div');
+    if (boardLoading.has(i)) {
+      slot.className = 'board-slot uploading';
+      slot.innerHTML = '<div class="spinner"></div>';
+    } else if (url) {
+      slot.className = 'board-slot filled';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = '';
+      slot.appendChild(img);
+      slot.onclick = () => tapBoardSlot(i);
+    } else {
+      slot.className = 'board-slot empty';
+      slot.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="10" y1="4" x2="10" y2="16"/><line x1="4" y1="10" x2="16" y2="10"/></svg>';
+      slot.onclick = () => tapBoardSlot(i);
+    }
+    grid.appendChild(slot);
+  });
+  if (ghost) ghost.hidden = board.every(s => s !== null);
+}
+
+function tapBoardSlot(index) {
+  if (boardLoading.has(index)) return;
+  boardSlotTarget = index;
+  document.getElementById('boardFileInput').click();
+}
+
+async function loadBoard(uid) {
+  try {
+    const snap = await getDoc(doc(db, 'users', uid, 'board', 'slots'));
+    if (snap.exists()) {
+      const data = snap.data();
+      for (let i = 0; i < 6; i++) board[i] = data['slot' + i] ?? null;
+    }
+  } catch { /* keep nulls on network failure */ }
+  renderBoard();
+}
+
+async function saveBoardSlot(index, url) {
+  if (!currentUid) return;
+  await setDoc(
+    doc(db, 'users', currentUid, 'board', 'slots'),
+    { ['slot' + index]: url },
+    { merge: true }
+  );
+}
+
+document.getElementById('boardFileInput').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file || !currentUid || boardSlotTarget < 0) { e.target.value = ''; return; }
+  const index = boardSlotTarget;
+  boardSlotTarget = -1;
+  e.target.value = '';
+  boardLoading.add(index);
+  renderBoard();
+  try {
+    const { blob, mimeType } = await compressImage(file);
+    const slotRef = storageRef(storage, `users/${currentUid}/board/${index}`);
+    await uploadBytes(slotRef, blob, { contentType: mimeType });
+    const url = await getDownloadURL(slotRef);
+    board[index] = url;
+    await saveBoardSlot(index, url);
+  } catch (err) {
+    console.error('Board upload failed:', err?.code, err?.message, err);
+    /* leave slot empty on error */
+  }
+  boardLoading.delete(index);
+  renderBoard();
+});
+
+document.getElementById('styleFileInput').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  await addStyleImage(file);
+});
+
+// ─── i18n helpers ───────────────────────────────────────────────────────────
+function rehydrate() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  renderGrid();
+  renderVibeChips();
+  if (document.getElementById('view-outfit').classList.contains('active')) renderOutfit();
+  if (document.getElementById('view-board').classList.contains('active'))  renderBoard();
+  if (document.getElementById('view-today').classList.contains('active'))  renderToday();
+}
+
+function chooseLang(l) {
+  setLang(l);
+  document.getElementById('lang-screen').hidden = true;
+  rehydrate();
+}
+
+function openLangModal() {
+  document.getElementById('lang-modal-overlay').hidden = false;
+}
+
+function pickLang(l) {
+  setLang(l);
+  document.getElementById('lang-modal-overlay').hidden = true;
+  rehydrate();
 }
 
 renderGrid();
 updateRateBtn();
+
+// ─── Expose functions referenced by inline onclick attributes ───────────────
+window.switchTab     = switchTab;
+window.setCategory   = setCategory;
+window.rateOutfit    = rateOutfit;
+window.removeSlot    = removeSlot;
+window.chooseLang    = chooseLang;
+window.openLangModal = openLangModal;
+window.pickLang      = pickLang;
+window.tapBoardSlot  = tapBoardSlot;
+window.shuffleToday  = shuffleToday;
+window.openProfileSheet  = openProfileSheet;
+window.closeProfileSheet = closeProfileSheet;
+window.removeStyleImage  = removeStyleImage;
+window.nextOnboardingStep = nextOnboardingStep;
+window.completeOnboarding = completeOnboarding;
+
+// ─── Hydrate [data-i18n] elements ──────────────────────────────────────────
+document.documentElement.lang = lang;
+document.querySelectorAll('[data-i18n]').forEach(el => {
+  el.textContent = t(el.dataset.i18n);
+});
+
+// ─── Load board data when user authenticates ───────────────────────────────
+
+// ─── Wardrobe Firestore persistence ─────────────────────────────────────────
+function addItem(item) {
+  items.unshift(item);
+  renderGrid();
+  if (currentUid) {
+    setDoc(doc(db, 'users', currentUid, 'items', String(item.id)), {
+      id: item.id, src: item.src, name: item.name, category: item.category
+    }).catch(err => console.error('Firestore write failed:', err));
+  }
+}
+
+function removeItem(id) {
+  items = items.filter(i => i.id !== id);
+  for (const cat of Object.keys(outfit)) {
+    if (outfit[cat]?.id === id) delete outfit[cat];
+  }
+  save();
+  renderGrid();
+  updateRateBtn();
+  if (currentUid) {
+    deleteDoc(doc(db, 'users', currentUid, 'items', String(id)))
+      .catch(err => console.error('Firestore delete failed:', err));
+  }
+}
+
+async function loadWardrobe(uid) {
+  wardrobeLoading = true;
+  renderGrid();
+  try {
+    const snap = await getDocs(query(collection(db, 'users', uid, 'items'), orderBy('id', 'asc')));
+    items = snap.docs.map(d => ({ ...d.data(), analyzing: false }));
+    // One-time migration: move localStorage items to Firestore
+    const legacy = JSON.parse(localStorage.getItem('marta_items') || '[]');
+    if (legacy.length > 0) {
+      const existingIds = new Set(items.map(i => i.id));
+      const newLegacy = legacy.filter(i => !existingIds.has(i.id));
+      await Promise.all(newLegacy.map(item => {
+        const data = { id: item.id, src: item.src, name: item.name, category: item.category };
+        return setDoc(doc(db, 'users', uid, 'items', String(item.id)), data);
+      }));
+      for (const item of newLegacy) {
+        items.push({ id: item.id, src: item.src, name: item.name, category: item.category, analyzing: false });
+      }
+      items.sort((a, b) => a.id - b.id);
+      localStorage.removeItem('marta_items');
+    }
+  } catch (err) { console.error('Wardrobe load failed:', err); }
+  wardrobeLoading = false;
+  renderGrid();
+}
+
+// ─── Style Profile data layer ────────────────────────────────────────────────
+async function loadStyleProfile(uid) {
+  try {
+    const snap = await getDocs(collection(db, 'users', uid, 'style-profile'));
+    styleProfile = snap.docs.map(d => d.data());
+  } catch (err) { console.error('Style profile load failed:', err); }
+}
+
+async function addStyleImage(file) {
+  if (!currentUid || !file) return;
+  if (styleProfile.length >= STYLE_MAX) return;
+  const id = Date.now();
+  styleProfile.push({ id, src: '' });
+  _renderProfileSlots('profileGrid');
+  _renderProfileSlots('onbStyleGrid');
+  try {
+    const { blob, mimeType } = await compressImage(file);
+    const sRef = storageRef(storage, `users/${currentUid}/style-profile/${id}`);
+    await uploadBytes(sRef, blob, { contentType: mimeType });
+    const src = await getDownloadURL(sRef);
+    await setDoc(doc(db, 'users', currentUid, 'style-profile', String(id)), { id, src });
+    const idx = styleProfile.findIndex(p => p.id === id);
+    if (idx !== -1) styleProfile[idx].src = src;
+  } catch (err) {
+    console.error('Style image upload failed:', err);
+    styleProfile = styleProfile.filter(p => p.id !== id);
+  }
+  _renderProfileSlots('profileGrid');
+  _renderProfileSlots('onbStyleGrid');
+}
+
+async function removeStyleImage(id) {
+  if (!currentUid) return;
+  styleProfile = styleProfile.filter(p => p.id !== id);
+  _renderProfileSlots('profileGrid');
+  _renderProfileSlots('onbStyleGrid');
+  try {
+    await deleteDoc(doc(db, 'users', currentUid, 'style-profile', String(id)));
+    await deleteObject(storageRef(storage, `users/${currentUid}/style-profile/${id}`));
+  } catch (err) { console.error('Style image remove failed:', err); }
+}
+
+function _renderProfileSlots(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  styleProfile.forEach(p => {
+    const slot = document.createElement('div');
+    slot.className = 'profile-slot filled';
+    if (p.src) {
+      const img = document.createElement('img');
+      img.src = p.src; img.alt = '';
+      slot.appendChild(img);
+    } else {
+      const ov = document.createElement('div');
+      ov.className = 'analyzing-overlay';
+      ov.innerHTML = '<div class="spinner"></div>';
+      slot.appendChild(ov);
+    }
+    const rm = document.createElement('button');
+    rm.className = 'profile-slot-remove';
+    rm.setAttribute('aria-label', 'Remove');
+    rm.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="8.5" y2="8.5"/><line x1="8.5" y1="1.5" x2="1.5" y2="8.5"/></svg>';
+    rm.onclick = () => removeStyleImage(p.id);
+    slot.appendChild(rm);
+    container.appendChild(slot);
+  });
+  if (styleProfile.length < STYLE_MAX) {
+    const slot = document.createElement('div');
+    slot.className = 'profile-slot empty';
+    slot.innerHTML = '<span class="upload-plus">+</span>';
+    slot.onclick = () => document.getElementById('styleFileInput').click();
+    container.appendChild(slot);
+  }
+}
+
+// ─── Profile sheet UI ────────────────────────────────────────────────────────
+function renderProfileSheet() { _renderProfileSlots('profileGrid'); }
+
+function openProfileSheet() {
+  document.getElementById('profile-sheet').hidden = false;
+  renderProfileSheet();
+}
+
+function closeProfileSheet() {
+  document.getElementById('profile-sheet').hidden = true;
+}
+
+// ─── Onboarding ──────────────────────────────────────────────────────────────
+function showOnboarding() {
+  document.getElementById('onboarding-overlay').hidden = false;
+  nextOnboardingStep(0);
+}
+
+function nextOnboardingStep(n) {
+  document.querySelectorAll('.onb-step').forEach((el, i) => el.classList.toggle('active', i === n));
+  document.querySelectorAll('.onb-dot').forEach((el, i) => el.classList.toggle('active', i === n));
+  if (n === 1) _renderProfileSlots('onbStyleGrid');
+}
+
+function completeOnboarding() {
+  localStorage.setItem('pintona_onboarded', 'true');
+  document.getElementById('onboarding-overlay').hidden = true;
+}
+
+window.addEventListener('pintona:auth', ({ detail }) => {
+  loadBoard(detail.uid);
+  loadWardrobe(detail.uid);
+  loadStyleProfile(detail.uid).then(() => {
+    renderProfileSheet();
+    if (!localStorage.getItem('pintona_onboarded')) showOnboarding();
+  });
+});
+
+// ─── Today ──────────────────────────────────────────────────────────────────
+let todayOffset = 0;
+
+function renderToday() {
+  const grid = document.getElementById('todayGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const n = items.length;
+  for (let i = 0; i < 4; i++) {
+    const cell = document.createElement('div');
+    if (n > 0) {
+      const item = items[(todayOffset + i) % n];
+      cell.className = 'today-cell';
+      const img = document.createElement('img');
+      img.src = item.src;
+      img.alt = item.name;
+      cell.appendChild(img);
+    } else {
+      cell.className = 'today-cell empty';
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function shuffleToday() {
+  if (items.length === 0) return;
+  todayOffset = (todayOffset + 1) % items.length;
+  renderToday();
+}
+
+// ─── Service Worker Registration ───────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('Service worker registration failed:', err);
+    });
+  });
+}
 </script>
+<script type="module" src="/firebase.js"></script>
 </body>
 </html>

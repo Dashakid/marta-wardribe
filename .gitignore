@@ -1,0 +1,6 @@
+node_modules/
+.env
+.env.local
+.vercel
+# firebase-config.js is intentionally committed — the Firebase web API key is public by design.
+# Protect data via Firebase security rules, not by hiding the config.
