@@ -31,14 +31,14 @@ export const translations = {
     // Board view (future)
     boardTitle:     'My Board',
     boardSubtitle:  'Saved looks',
-    boardEmpty:     'Save outfits to see them here',
+    boardEmpty:     'Add inspiration photos — looks you love',
     // Closet header
     closetTitle:    'Pintona',
     closetSubtitle: 'Your look',
     // Today view (future)
     todayTitle:     'Today',
     todaySubtitle:  'Your daily look',
-    todayAiNote:    'AI-powered suggestion',
+    todayAiNote:    'Picked from your wardrobe',
     todayShuffle:   'Shuffle',
     // Language picker
     langChoose:     'Choose language',
@@ -63,6 +63,12 @@ export const translations = {
     onbReadyTitle:  "You're all set",
     onbReadySub:    'Your AI style coach is ready',
     onbEnter:       'Enter Pintona',
+    // Toasts
+    toastUploadFail:'Upload failed. Try again.',
+    toastBoardFail: 'Could not add that photo. Try again.',
+    toastStyleFail: 'Could not add that reference. Try again.',
+    toastLoadFail:  'Could not load your wardrobe. Pull to retry or reload.',
+    toastRemoved:   'Removed',
   },
 
   es: {
@@ -94,14 +100,14 @@ export const translations = {
     // Board view (future)
     boardTitle:     'Mi Tablero',
     boardSubtitle:  'Looks guardados',
-    boardEmpty:     'Guarda outfits para verlos aquí',
+    boardEmpty:     'Añade fotos de inspiración — looks que te encantan',
     // Closet header
     closetTitle:    'Pintona',
     closetSubtitle: 'Tu look',
     // Today view (future)
     todayTitle:     'Hoy',
     todaySubtitle:  'Tu look de hoy',
-    todayAiNote:    'Sugerencia con IA',
+    todayAiNote:    'Elegido de tu armario',
     todayShuffle:   'Mezclar',
     // Language picker
     langChoose:     'Elegir idioma',
@@ -126,6 +132,12 @@ export const translations = {
     onbReadyTitle:  'Todo listo',
     onbReadySub:    'Tu coach de estilo con IA está listo',
     onbEnter:       'Entrar a Pintona',
+    // Toasts
+    toastUploadFail:'No se pudo subir la foto. Inténtalo de nuevo.',
+    toastBoardFail: 'No se pudo añadir esa foto. Inténtalo de nuevo.',
+    toastStyleFail: 'No se pudo añadir esa referencia. Inténtalo de nuevo.',
+    toastLoadFail:  'No se pudo cargar tu armario. Desliza para reintentar o recarga.',
+    toastRemoved:   'Eliminado',
   },
 
   vi: {
@@ -157,14 +169,14 @@ export const translations = {
     // Board view (future)
     boardTitle:     'Bảng của tôi',
     boardSubtitle:  'Outfit đã lưu',
-    boardEmpty:     'Lưu outfit để xem ở đây',
+    boardEmpty:     'Thêm ảnh cảm hứng — những look bạn yêu thích',
     // Closet header
     closetTitle:    'Pintona',
     closetSubtitle: 'Phong cách của bạn',
     // Today view (future)
     todayTitle:     'Hôm nay',
     todaySubtitle:  'Trang phục hôm nay của bạn',
-    todayAiNote:    'Gợi ý từ AI',
+    todayAiNote:    'Được chọn từ tủ đồ của bạn',
     todayShuffle:   'Ngẫu nhiên',
     // Language picker
     langChoose:     'Chọn ngôn ngữ',
@@ -189,6 +201,12 @@ export const translations = {
     onbReadyTitle:  'Bạn đã sẵn sàng',
     onbReadySub:    'AI stylist của bạn đã sẵn sàng',
     onbEnter:       'Vào Pintona',
+    // Toasts
+    toastUploadFail:'Tải ảnh lên thất bại. Thử lại nhé.',
+    toastBoardFail: 'Không thể thêm ảnh đó. Thử lại nhé.',
+    toastStyleFail: 'Không thể thêm tham khảo đó. Thử lại nhé.',
+    toastLoadFail:  'Không thể tải tủ đồ của bạn. Kéo để thử lại hoặc tải lại trang.',
+    toastRemoved:   'Đã xóa',
   },
 };
 

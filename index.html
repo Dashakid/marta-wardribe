@@ -7,102 +7,113 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Pintona">
   <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
   <title>Pintona</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #faf9f7; --ink: #1a1a1a; --card: #fff; --surface: #f0ede8; --empty: #EDE8E1;
+      --hairline: #e0ddd8; --error: #c0392b;
+      --muted-1: #888; --muted-2: #999; --muted-3: #aaa; --muted-4: #bbb; --muted-5: #ccc;
+      --r-pill: 20px; --r-card: 10px; --r-board: 8px; --r-thumb: 6px; --r-modal: 16px;
+      --gap: 8px; --gutter: 16px;
+      --font-display: 'Cormorant Garamond', serif; --font-body: 'DM Sans', sans-serif;
+      --dur: 0.15s; --ease: cubic-bezier(0.4,0,0.2,1);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'DM Sans', sans-serif; font-weight: 300; background: #faf9f7; color: #1a1a1a; min-height: 100dvh; display: flex; flex-direction: column; }
-    .header { padding: 56px 20px 12px; border-bottom: 0.5px solid #e0ddd8; display: flex; align-items: baseline; gap: 10px; background: #faf9f7; position: sticky; top: 0; z-index: 10; }
-    .header h1 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; font-style: italic; }
-    .header span { font-size: 11px; color: #888; letter-spacing: 0.1em; text-transform: uppercase; }
-    .tabs { display: flex; border-bottom: 0.5px solid #e0ddd8; background: #faf9f7; position: sticky; top: 64px; z-index: 9; }
-    .tab { flex: 1; padding: 10px 4px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; border: none; background: transparent; color: #999; cursor: pointer; border-bottom: 1.5px solid transparent; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
-    .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+    body { font-family: var(--font-body); font-weight: 300; background: var(--bg); color: var(--ink); min-height: 100dvh; display: flex; flex-direction: column; }
+    .header { padding: 56px 20px 12px; border-bottom: 0.5px solid var(--hairline); display: flex; align-items: baseline; gap: 10px; background: var(--bg); position: sticky; top: 0; z-index: 10; }
+    .header h1 { font-family: var(--font-display); font-size: 24px; font-weight: 300; font-style: italic; }
+    .header span { font-size: 11px; color: var(--muted-1); letter-spacing: 0.1em; text-transform: uppercase; }
+    .tabs { display: flex; border-bottom: 0.5px solid var(--hairline); background: var(--bg); position: sticky; top: 64px; z-index: 9; }
+    .tab { flex: 1; padding: 10px 4px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; border: none; background: transparent; color: var(--muted-2); cursor: pointer; border-bottom: 1.5px solid transparent; transition: all var(--dur); font-family: var(--font-body); }
+    .tab.active { color: var(--ink); border-bottom-color: var(--ink); }
     .view { display: none; flex: 1; flex-direction: column; }
     .view.active { display: flex; }
     .cats { display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto; scrollbar-width: none; }
     .cats::-webkit-scrollbar { display: none; }
-    .cat-btn { white-space: nowrap; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; padding: 5px 12px; border: 0.5px solid #ccc; background: transparent; color: #888; border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-    .cat-btn.active { background: #1a1a1a; color: #faf9f7; border-color: #1a1a1a; }
-    .clothes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 16px 24px; overflow-y: auto; flex: 1; }
-    .cloth-card { aspect-ratio: 3/4; border-radius: 10px; overflow: hidden; border: 0.5px solid #e0ddd8; background: #f0ede8; cursor: pointer; position: relative; transition: border-color 0.15s; }
-    .cloth-card.selected { border: 2px solid #1a1a1a; }
+    .cat-btn { white-space: nowrap; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; padding: 5px 12px; border: 0.5px solid var(--muted-5); background: transparent; color: var(--muted-1); border-radius: var(--r-pill); cursor: pointer; font-family: var(--font-body); transition: all var(--dur); }
+    .cat-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .clothes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); padding: 0 16px 24px; overflow-y: auto; flex: 1; }
+    .cloth-card { aspect-ratio: 3/4; border-radius: var(--r-card); overflow: hidden; border: 0.5px solid var(--hairline); background: var(--surface); cursor: pointer; position: relative; transition: border-color var(--dur); }
+    .cloth-card.selected { border: 2px solid var(--ink); }
     .cloth-card img { width: 100%; height: 100%; object-fit: cover; }
     .cloth-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(250,249,247,0.92); font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 6px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cloth-check { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; background: #1a1a1a; border-radius: 50%; display: none; align-items: center; justify-content: center; }
+    .cloth-check { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; background: var(--ink); border-radius: 50%; display: none; align-items: center; justify-content: center; }
     .cloth-card.selected .cloth-check { display: flex; }
     .cloth-check svg { width: 10px; height: 10px; }
     .cloth-card-delete { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; background: rgba(0,0,0,0.45); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; padding: 0; }
-    .upload-card { aspect-ratio: 3/4; border-radius: 10px; border: 0.5px dashed #bbb; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #bbb; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-    .upload-plus { font-size: 26px; font-weight: 200; line-height: 1; color: #bbb; }
-    .analyzing-overlay { position: absolute; inset: 0; background: rgba(250,249,247,0.8); display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .upload-card { aspect-ratio: 3/4; border-radius: var(--r-card); border: 0.5px dashed var(--muted-4); background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--muted-4); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; font-family: var(--font-body); }
+    .upload-plus { font-size: 26px; font-weight: 200; line-height: 1; color: var(--muted-4); }
+    .analyzing-overlay { position: absolute; inset: 0; background: rgba(250,249,247,0.8); display: flex; align-items: center; justify-content: center; border-radius: var(--r-card); }
     .outfit-view { padding: 16px; overflow-y: auto; flex: 1; }
-    .outfit-empty { text-align: center; padding: 40px 20px; color: #bbb; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; }
-    .outfit-slot { display: flex; align-items: center; gap: 12px; padding: 10px; border: 0.5px solid #e0ddd8; border-radius: 10px; margin-bottom: 8px; background: #fff; }
-    .slot-img { width: 42px; height: 56px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+    .outfit-empty { text-align: center; padding: 40px 20px; color: var(--muted-4); font-family: var(--font-display); font-style: italic; font-size: 16px; }
+    .outfit-slot { display: flex; align-items: center; gap: 12px; padding: 10px; border: 0.5px solid var(--hairline); border-radius: var(--r-card); margin-bottom: 8px; background: var(--card); }
+    .slot-img { width: 42px; height: 56px; border-radius: var(--r-thumb); object-fit: cover; flex-shrink: 0; }
     .slot-info { flex: 1; min-width: 0; }
-    .slot-cat { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; }
-    .slot-name { font-size: 13px; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .slot-remove { background: none; border: none; cursor: pointer; color: #ccc; font-size: 20px; line-height: 1; padding: 4px; }
-    .rate-btn { width: 100%; margin-top: 16px; padding: 14px; font-family: 'Cormorant Garamond', serif; font-size: 17px; font-style: italic; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 10px; cursor: pointer; letter-spacing: 0.03em; transition: opacity 0.15s; }
+    .slot-cat { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-3); }
+    .slot-name { font-size: 13px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .slot-remove { background: none; border: none; cursor: pointer; color: var(--muted-5); font-size: 20px; line-height: 1; padding: 4px; }
+    .rate-btn { width: 100%; margin-top: 16px; padding: 14px; font-family: var(--font-display); font-size: 17px; font-style: italic; background: var(--ink); color: var(--bg); border: none; border-radius: var(--r-card); cursor: pointer; letter-spacing: 0.03em; transition: opacity var(--dur); }
     .rate-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .feedback { margin-top: 14px; background: #fff; border: 0.5px solid #e0ddd8; border-radius: 10px; padding: 14px; font-size: 13px; line-height: 1.65; color: #555; }
-    .feedback.loading { display: flex; align-items: center; gap: 10px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; color: #aaa; }
-    .score { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; font-style: italic; display: block; margin-bottom: 6px; color: #1a1a1a; }
+    .feedback { margin-top: 14px; background: var(--card); border: 0.5px solid var(--hairline); border-radius: var(--r-card); padding: 14px; font-size: 13px; line-height: 1.65; color: #555; }
+    .feedback.loading { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-style: italic; font-size: 15px; color: var(--muted-3); }
+    .score { font-family: var(--font-display); font-size: 32px; font-weight: 300; font-style: italic; display: block; margin-bottom: 6px; color: var(--ink); }
     /* ─── Vibe picker ─── */
     .vibe-row { margin-top: 14px; }
-    .vibe-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; margin-bottom: 7px; }
+    .vibe-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-3); margin-bottom: 7px; }
     .vibe-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-    .vibe-chip { font-size: 11px; letter-spacing: 0.05em; padding: 5px 11px; border: 0.5px solid #ccc; background: transparent; color: #888; border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; white-space: nowrap; }
-    .vibe-chip.active { background: #1a1a1a; color: #faf9f7; border-color: #1a1a1a; }
+    .vibe-chip { font-size: 11px; letter-spacing: 0.05em; padding: 5px 11px; border: 0.5px solid var(--muted-5); background: transparent; color: var(--muted-1); border-radius: var(--r-pill); cursor: pointer; font-family: var(--font-body); transition: all var(--dur); white-space: nowrap; }
+    .vibe-chip.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
     /* ─── Profile icon button ─── */
-    .profile-btn { background: none; border: none; cursor: pointer; color: #ccc; padding: 4px; display: flex; align-items: center; transition: color 0.15s; }
-    .profile-btn:hover { color: #1a1a1a; }
+    .profile-btn { background: none; border: none; cursor: pointer; color: var(--muted-5); padding: 4px; display: flex; align-items: center; transition: color var(--dur); }
+    .profile-btn:hover { color: var(--ink); }
     /* ─── Profile sheet ─── */
-    #profile-sheet { position: absolute; inset: 0; z-index: 15; background: #faf9f7; display: flex; flex-direction: column; overflow-y: auto; }
+    #profile-sheet { position: absolute; inset: 0; z-index: 15; background: var(--bg); display: flex; flex-direction: column; overflow-y: auto; }
     #profile-sheet[hidden] { display: none; }
-    .profile-sheet-header { padding: 56px 20px 14px; border-bottom: 0.5px solid #e0ddd8; display: flex; align-items: center; }
-    .profile-sheet-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; font-style: italic; flex: 1; }
-    .profile-sheet-close { background: none; border: none; cursor: pointer; font-size: 24px; color: #bbb; padding: 4px; line-height: 1; }
+    .profile-sheet-header { padding: 56px 20px 14px; border-bottom: 0.5px solid var(--hairline); display: flex; align-items: center; }
+    .profile-sheet-title { font-family: var(--font-display); font-size: 22px; font-weight: 300; font-style: italic; flex: 1; }
+    .profile-sheet-close { background: none; border: none; cursor: pointer; font-size: 24px; color: var(--muted-4); padding: 4px; line-height: 1; }
     .profile-sheet-body { padding: 16px; flex: 1; }
-    .profile-sheet-sub { font-size: 10px; color: #aaa; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
-    .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .profile-slot { aspect-ratio: 3/4; border-radius: 10px; overflow: hidden; position: relative; }
-    .profile-slot.empty { border: 0.5px dashed #bbb; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .profile-sheet-sub { font-size: 10px; color: var(--muted-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+    .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+    .profile-slot { aspect-ratio: 3/4; border-radius: var(--r-card); overflow: hidden; position: relative; }
+    .profile-slot.empty { border: 0.5px dashed var(--muted-4); background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .profile-slot.filled img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .profile-slot-remove { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; background: rgba(0,0,0,0.45); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; padding: 0; }
     /* ─── Onboarding overlay ─── */
-    #onboarding-overlay { position: fixed; inset: 0; z-index: 55; background: #faf9f7; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+    #onboarding-overlay { position: fixed; inset: 0; z-index: 55; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
     #onboarding-overlay[hidden] { display: none; }
     .onb-wrap { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; }
     .onb-dots { display: flex; gap: 6px; margin-bottom: 32px; }
     .onb-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: background 0.2s; }
-    .onb-dot.active { background: #1a1a1a; }
+    .onb-dot.active { background: var(--ink); }
     .onb-step { display: none; width: 100%; flex-direction: column; align-items: center; text-align: center; }
     .onb-step.active { display: flex; }
     .onb-icon { font-size: 32px; margin-bottom: 16px; line-height: 1; }
-    .onb-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; font-style: italic; margin-bottom: 8px; color: #1a1a1a; }
-    .onb-sub { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 6px; max-width: 280px; }
-    .onb-hint { font-size: 11px; color: #bbb; letter-spacing: 0.05em; margin-bottom: 24px; }
+    .onb-title { font-family: var(--font-display); font-size: 28px; font-weight: 300; font-style: italic; margin-bottom: 8px; color: var(--ink); }
+    .onb-sub { font-size: 13px; color: var(--muted-1); line-height: 1.6; margin-bottom: 6px; max-width: 280px; }
+    .onb-hint { font-size: 11px; color: var(--muted-4); letter-spacing: 0.05em; margin-bottom: 24px; }
     .onb-grid { width: 100%; margin-bottom: 20px; text-align: left; }
-    .onb-btn { width: 100%; padding: 14px; font-family: 'Cormorant Garamond', serif; font-size: 17px; font-style: italic; background: #1a1a1a; color: #faf9f7; border: none; border-radius: 10px; cursor: pointer; letter-spacing: 0.03em; margin-bottom: 10px; }
-    .onb-skip { background: none; border: none; font-size: 11px; color: #bbb; cursor: pointer; font-family: 'DM Sans', sans-serif; letter-spacing: 0.07em; text-transform: uppercase; padding: 4px; }
-    .spinner { width: 16px; height: 16px; border: 1.5px solid #ddd; border-top-color: #888; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+    .onb-btn { width: 100%; padding: 14px; font-family: var(--font-display); font-size: 17px; font-style: italic; background: var(--ink); color: var(--bg); border: none; border-radius: var(--r-card); cursor: pointer; letter-spacing: 0.03em; margin-bottom: 10px; }
+    .onb-skip { background: none; border: none; font-size: 11px; color: var(--muted-4); cursor: pointer; font-family: var(--font-body); letter-spacing: 0.07em; text-transform: uppercase; padding: 4px; }
+    .spinner { width: 16px; height: 16px; border: 1.5px solid #ddd; border-top-color: var(--muted-1); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
     input[type="file"] { display: none; }
     /* ─── App wrapper ─── */
     #app { display: flex; flex-direction: column; flex: 1; position: relative; }
     /* ─── Login screen ─── */
-    #login-screen { position: fixed; inset: 0; z-index: 50; background: #faf9f7; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    #login-screen { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 24px; }
     #login-screen[hidden] { display: none; }
     .login-card { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 320px; width: 100%; }
     .login-logo { margin-bottom: 28px; }
-    .login-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; font-style: italic; margin-bottom: 8px; }
-    .login-sub { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; margin-bottom: 40px; }
-    .login-google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px 20px; background: #fff; border: 0.5px solid #ddd; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; color: #1a1a1a; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
-    .login-google-btn:hover { border-color: #bbb; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .login-title { font-family: var(--font-display); font-size: 30px; font-weight: 300; font-style: italic; margin-bottom: 8px; }
+    .login-sub { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-3); margin-bottom: 40px; }
+    .login-google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px 20px; background: var(--card); border: 0.5px solid #ddd; border-radius: var(--r-card); font-family: var(--font-body); font-size: 13px; font-weight: 400; color: var(--ink); cursor: pointer; transition: border-color var(--dur), box-shadow var(--dur); }
+    .login-google-btn:hover { border-color: var(--muted-4); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .login-google-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .login-error { margin-top: 14px; font-size: 12px; color: #c0392b; min-height: 18px; }
+    .login-error { margin-top: 14px; font-size: 12px; color: var(--error); min-height: 18px; }
     /* ─── Login entrance animation ─── */
     @keyframes pintonaDraw {
       to { stroke-dashoffset: 0; }
@@ -114,79 +125,97 @@
     /* 1 — crown peak  (~50 units) */
     .login-logo svg g > *:nth-child(1) {
       stroke-dasharray: 52; stroke-dashoffset: 52;
-      animation: pintonaDraw 0.45s cubic-bezier(0.4,0,0.2,1) 0.1s both;
+      animation: pintonaDraw 0.45s var(--ease) 0.1s both;
     }
     /* 2 — top crossbar (~22 units) */
     .login-logo svg g > *:nth-child(2) {
       stroke-dasharray: 24; stroke-dashoffset: 24;
-      animation: pintonaDraw 0.2s cubic-bezier(0.4,0,0.2,1) 0.55s both;
+      animation: pintonaDraw 0.2s var(--ease) 0.55s both;
     }
     /* 3 — vertical drop (~11 units) */
     .login-logo svg g > *:nth-child(3) {
       stroke-dasharray: 13; stroke-dashoffset: 13;
-      animation: pintonaDraw 0.15s cubic-bezier(0.4,0,0.2,1) 0.75s both;
+      animation: pintonaDraw 0.15s var(--ease) 0.75s both;
     }
     /* 4 — left arm sweeps out (~58 units) */
     .login-logo svg g > *:nth-child(4) {
       stroke-dasharray: 62; stroke-dashoffset: 62;
-      animation: pintonaDraw 0.4s cubic-bezier(0.4,0,0.2,1) 0.9s both;
+      animation: pintonaDraw 0.4s var(--ease) 0.9s both;
     }
     /* 5 — right arm sweeps out simultaneously */
     .login-logo svg g > *:nth-child(5) {
       stroke-dasharray: 62; stroke-dashoffset: 62;
-      animation: pintonaDraw 0.4s cubic-bezier(0.4,0,0.2,1) 0.9s both;
+      animation: pintonaDraw 0.4s var(--ease) 0.9s both;
     }
     /* 6 — base bar slides across (~84 units) */
     .login-logo svg g > *:nth-child(6) {
       stroke-dasharray: 86; stroke-dashoffset: 86;
-      animation: pintonaDraw 0.35s cubic-bezier(0.4,0,0.2,1) 1.3s both;
+      animation: pintonaDraw 0.35s var(--ease) 1.3s both;
     }
     .login-title     { animation: pintonaFadeUp 0.5s ease 1.7s  both; }
     .login-sub       { animation: pintonaFadeUp 0.5s ease 1.85s both; }
     .login-google-btn{ animation: pintonaFadeUp 0.5s ease 2.0s  both; }
     /* ─── Header user area ─── */
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-    #user-name { font-size: 11px; color: #888; }
-    #sign-out-btn { background: none; border: none; cursor: pointer; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #bbb; font-family: 'DM Sans', sans-serif; padding: 4px 0; transition: color 0.15s; }
-    #sign-out-btn:hover { color: #1a1a1a; }
+    #user-name { font-size: 11px; color: var(--muted-1); }
+    #sign-out-btn { background: none; border: none; cursor: pointer; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-4); font-family: var(--font-body); padding: 4px 0; transition: color var(--dur); }
+    #sign-out-btn:hover { color: var(--ink); }
     /* ─── Globe button ─── */
-    .globe-btn { background: none; border: none; cursor: pointer; color: #ccc; padding: 4px; display: flex; align-items: center; transition: color 0.15s; }
-    .globe-btn:hover { color: #1a1a1a; }
+    .globe-btn { background: none; border: none; cursor: pointer; color: var(--muted-5); padding: 4px; display: flex; align-items: center; transition: color var(--dur); }
+    .globe-btn:hover { color: var(--ink); }
     /* ─── Language selection screen ─── */
-    #lang-screen { position: fixed; inset: 0; z-index: 60; background: #faf9f7; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    #lang-screen { position: fixed; inset: 0; z-index: 60; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 24px; }
     #lang-screen[hidden] { display: none; }
     .lang-screen-card { display: flex; flex-direction: column; align-items: center; max-width: 300px; width: 100%; }
     .lang-screen-mark { margin-bottom: 24px; }
-    .lang-screen-title { font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-style: italic; color: #1a1a1a; margin-bottom: 10px; }
-    .lang-screen-sub { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; margin-bottom: 28px; }
+    .lang-screen-title { font-family: var(--font-display); font-size: 28px; font-style: italic; color: var(--ink); margin-bottom: 10px; }
+    .lang-screen-sub { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-3); margin-bottom: 28px; }
     /* ─── Language buttons (shared by screen + modal) ─── */
-    .lang-btn { width: 100%; height: 48px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 14px; font-family: 'DM Sans', sans-serif; color: #1a1a1a; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+    .lang-btn { width: 100%; height: 48px; border: 1px solid #ddd; border-radius: var(--r-card); background: var(--card); font-size: 14px; font-family: var(--font-body); color: var(--ink); cursor: pointer; transition: border-color var(--dur), box-shadow var(--dur); }
     .lang-btn + .lang-btn { margin-top: 8px; }
-    .lang-btn:hover { border-color: #bbb; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .lang-btn:hover { border-color: var(--muted-4); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     /* ─── In-app language modal ─── */
     #lang-modal-overlay { position: absolute; inset: 0; z-index: 20; background: rgba(250,249,247,0.96); display: flex; align-items: center; justify-content: center; padding: 24px; }
     #lang-modal-overlay[hidden] { display: none; }
-    .lang-modal { background: #fff; border: 0.5px solid #e0ddd8; border-radius: 16px; padding: 24px 20px; width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: 8px; }
-    .lang-modal-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; text-align: center; margin-bottom: 6px; }
+    .lang-modal { background: var(--card); border: 0.5px solid var(--hairline); border-radius: var(--r-modal); padding: 24px 20px; width: 100%; max-width: 280px; display: flex; flex-direction: column; gap: var(--gap); }
+    .lang-modal-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-3); text-align: center; margin-bottom: 6px; }
     /* ─── Board view ─── */
     .board-view { padding: 16px; overflow-y: auto; flex: 1; }
-    .board-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
-    .board-slot { aspect-ratio: 4/5; border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; }
-    .board-slot.empty { border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #ccc; }
+    .board-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); margin-bottom: 4px; }
+    .board-slot { aspect-ratio: 4/5; border-radius: var(--r-board); overflow: hidden; cursor: pointer; position: relative; }
+    .board-slot.empty { border: 1px dashed var(--muted-5); display: flex; align-items: center; justify-content: center; color: var(--muted-5); }
     .board-slot.filled img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .board-slot.uploading { background: #f0ede8; display: flex; align-items: center; justify-content: center; }
-    .board-ghost { text-align: center; padding: 20px 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; color: #ccc; }
+    .board-slot.uploading { background: var(--surface); display: flex; align-items: center; justify-content: center; }
+    .board-ghost { text-align: center; padding: 20px 0; font-family: var(--font-display); font-style: italic; font-size: 16px; color: var(--muted-5); }
     /* ─── Today view ─── */
     .today-view { padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
     .today-header { display: flex; flex-direction: column; gap: 4px; }
-    .today-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: #1a1a1a; }
-    .today-subtitle { font-size: 11px; color: #999; letter-spacing: 0.08em; text-transform: uppercase; }
-    .today-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .today-title { font-family: var(--font-display); font-style: italic; font-size: 20px; color: var(--ink); }
+    .today-subtitle { font-size: 11px; color: var(--muted-2); letter-spacing: 0.08em; text-transform: uppercase; }
+    .today-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
     .today-cell { aspect-ratio: 3/4; border-radius: 9px; overflow: hidden; }
     .today-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .today-cell.empty { background: #EDE8E1; }
-    .today-ai-note { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; color: #aaa; text-align: center; }
-  </style>
+    .today-cell.empty { background: var(--empty); }
+    .today-ai-note { font-family: var(--font-display); font-style: italic; font-size: 14px; color: var(--muted-3); text-align: center; }
+  
+    /* ─── Additive layer: skeletons, toast, empty states, micro-interactions ─── */
+    .skeleton-card { aspect-ratio: 3/4; border-radius: var(--r-card); background: var(--surface); position: relative; overflow: hidden; }
+    #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(8px); background: var(--ink); color: var(--bg); font-family: var(--font-body); font-size: 12px; letter-spacing: 0.03em; padding: 9px 18px; border-radius: var(--r-pill); opacity: 0; pointer-events: none; z-index: 70; transition: opacity 0.25s var(--ease), transform 0.25s var(--ease); }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .wardrobe-empty, .today-empty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; padding: 28px 0 12px; color: var(--muted-4); }
+    .wardrobe-empty svg, .today-empty svg, .outfit-empty svg { display: block; margin: 0 auto 10px; opacity: 0.55; }
+    @media (prefers-reduced-motion: no-preference) {
+      .skeleton-card::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent); animation: shimmer 1.4s infinite; }
+      @keyframes shimmer { to { transform: translateX(100%); } }
+      .card-enter { animation: pintonaFadeUp 0.25s var(--ease) both; animation-delay: calc(var(--i, 0) * 30ms); }
+      .cloth-card:active, .cat-btn:active, .vibe-chip:active, .board-slot:active, .upload-card:active,
+      .rate-btn:active:not(:disabled), .lang-btn:active, .login-google-btn:active { transform: scale(0.98); }
+      .cloth-card, .cat-btn, .vibe-chip, .board-slot, .upload-card, .rate-btn, .lang-btn, .login-google-btn { transition: transform var(--dur) var(--ease), border-color var(--dur), background var(--dur), color var(--dur), opacity var(--dur), box-shadow var(--dur); }
+      .cloth-card.selected .cloth-check polyline { stroke-dasharray: 12; stroke-dashoffset: 12; animation: pintonaDraw 0.2s var(--ease) 0.05s both; }
+      .feedback { animation: pintonaFadeUp 0.3s var(--ease) both; }
+      ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.18s; }
+    }
+</style>
   <script type="importmap">
   {
     "imports": {
@@ -386,7 +415,7 @@
 </div><!-- /#app -->
 <script type="module">
 import { t, lang, setLang } from './i18n.js';
-import { storage, currentUid, db } from './firebase.js';
+import { auth, storage, currentUid, db } from './firebase.js';
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { doc, getDoc, setDoc, deleteDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
 const CATS = ['top','bottom','dress','outerwear','shoes','accessory'];
@@ -394,6 +423,11 @@ const ORDER = ['outerwear','top','dress','bottom','shoes','accessory'];
 let items = [];
 let wardrobeLoading = false;
 let outfit = JSON.parse(localStorage.getItem('marta_outfit') || '{}');
+// Migrate legacy shape {category: itemObject} → {category: itemId}; items are
+// resolved from the wardrobe at render time so deletes/renames can't go stale.
+for (const cat of Object.keys(outfit)) {
+  if (outfit[cat] && typeof outfit[cat] === 'object') outfit[cat] = outfit[cat].id;
+}
 let activeCategory = 'all';
 
 // ─── Style Profile state ─────────────────────────────────────────────────────
@@ -404,14 +438,53 @@ function save() {
   localStorage.setItem('marta_outfit', JSON.stringify(outfit));
 }
 
+// Item names/categories come from Gemini output and Firestore — escape before innerHTML
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.remove('show');
+  void el.offsetWidth; // restart the transition
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function resolveOutfitItems() {
+  return ORDER.map(cat => items.find(i => i.id === outfit[cat])).filter(Boolean);
+}
+
+// Line-art empty states, same stroke language as the hanger logo
+const EMPTY_ART = {
+  wardrobe: '<svg viewBox="0 0 120 96" width="88" height="70" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="14" y1="22" x2="106" y2="22"/><line x1="20" y1="22" x2="20" y2="86"/><line x1="100" y1="22" x2="100" y2="86"/><line x1="44" y1="22" x2="44" y2="30"/><path d="M 44,30 L 32,44 L 56,44 Z"/><line x1="72" y1="22" x2="72" y2="30"/><path d="M 72,30 C 64,32 62,40 62,50 L 82,50 C 82,40 80,32 72,30 Z"/></svg>',
+  outfit: '<svg viewBox="0 0 120 96" width="88" height="70" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="60" y1="10" x2="60" y2="18"/><path d="M 48,24 C 48,20 53,18 60,18 C 67,18 72,20 72,24"/><path d="M 48,24 C 46,34 44,42 46,50 C 50,56 70,56 74,50 C 76,42 74,34 72,24"/><line x1="60" y1="56" x2="60" y2="76"/><line x1="46" y1="84" x2="74" y2="84"/><line x1="52" y1="76" x2="68" y2="76"/></svg>',
+  today: '<svg viewBox="0 0 120 96" width="88" height="70" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="60" cy="32" r="11"/><line x1="60" y1="12" x2="60" y2="16"/><line x1="40" y1="32" x2="44" y2="32"/><line x1="76" y1="32" x2="80" y2="32"/><line x1="46" y1="18" x2="49" y2="21"/><line x1="74" y1="18" x2="71" y2="21"/><path d="M 38,62 L 82,62 L 82,72 L 38,72 Z"/><path d="M 42,72 L 78,72 L 78,82 L 42,82 Z"/></svg>'
+};
+
 function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('view-' + name).classList.add('active');
-  if (name === 'outfit') renderOutfit();
-  if (name === 'board')  renderBoard();
-  if (name === 'today')  renderToday();
+  const apply = () => {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + name).classList.add('active');
+    if (name === 'outfit') renderOutfit();
+    if (name === 'board')  renderBoard();
+    if (name === 'today')  renderToday();
+  };
+  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.startViewTransition(apply);
+  } else {
+    apply();
+  }
 }
 
 function setCategory(cat, btn) {
@@ -425,10 +498,11 @@ function renderGrid() {
   const grid = document.getElementById('clothesGrid');
   grid.innerHTML = '';
   if (wardrobeLoading) {
-    const spinner = document.createElement('div');
-    spinner.className = 'upload-card';
-    spinner.innerHTML = '<div class="spinner"></div>';
-    grid.appendChild(spinner);
+    for (let i = 0; i < 6; i++) {
+      const ghost = document.createElement('div');
+      ghost.className = 'skeleton-card';
+      grid.appendChild(ghost);
+    }
     return;
   }
   const visible = activeCategory === 'all' ? items : items.filter(i => i.category === activeCategory);
@@ -437,11 +511,19 @@ function renderGrid() {
   addCard.onclick = () => document.getElementById('fileInput').click();
   addCard.innerHTML = '<span class="upload-plus">+</span><span>' + t('addPiece') + '</span>';
   grid.appendChild(addCard);
-  visible.forEach(item => {
+  if (items.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'wardrobe-empty';
+    empty.innerHTML = EMPTY_ART.wardrobe;
+    grid.appendChild(empty);
+    return;
+  }
+  visible.forEach((item, i) => {
     const card = document.createElement('div');
-    card.className = 'cloth-card' + (outfit[item.category]?.id === item.id ? ' selected' : '');
+    card.className = 'cloth-card card-enter' + (outfit[item.category] === item.id ? ' selected' : '');
+    card.style.setProperty('--i', i);
     card.onclick = () => toggleItem(item);
-    card.innerHTML = '<img src="' + item.src + '" alt="' + item.name + '"><div class="cloth-label">' + item.name + '</div><div class="cloth-check"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>';
+    card.innerHTML = '<img src="' + esc(item.src) + '" alt="' + esc(item.name) + '"><div class="cloth-label">' + esc(item.name) + '</div><div class="cloth-check"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>';
     if (item.analyzing) {
       const ov = document.createElement('div');
       ov.className = 'analyzing-overlay';
@@ -459,29 +541,30 @@ function renderGrid() {
 }
 
 function toggleItem(item) {
-  if (outfit[item.category]?.id === item.id) { delete outfit[item.category]; }
-  else { outfit[item.category] = item; }
+  if (outfit[item.category] === item.id) { delete outfit[item.category]; }
+  else { outfit[item.category] = item.id; }
   document.getElementById('feedbackBox').style.display = 'none';
   save(); renderGrid(); updateRateBtn();
 }
 
 function updateRateBtn() {
   const btn = document.getElementById('rateBtn');
-  if (btn) btn.disabled = Object.keys(outfit).length < 2;
+  if (btn) btn.disabled = resolveOutfitItems().length < 2;
 }
 
 function renderOutfit() {
   const panel = document.getElementById('outfitSlots');
   panel.innerHTML = '';
-  const hasItem = ORDER.some(c => outfit[c]);
-  if (!hasItem) { panel.innerHTML = '<div class="outfit-empty">' + t('outfitEmpty') + '</div>'; }
-  else {
-    ORDER.forEach(cat => {
-      if (!outfit[cat]) return;
-      const item = outfit[cat];
+  const chosen = ORDER.filter(cat => items.some(i => i.id === outfit[cat]));
+  if (!chosen.length) {
+    panel.innerHTML = '<div class="outfit-empty">' + EMPTY_ART.outfit + '<div>' + t('outfitEmpty') + '</div></div>';
+  } else {
+    chosen.forEach((cat, i) => {
+      const item = items.find(it => it.id === outfit[cat]);
       const slot = document.createElement('div');
-      slot.className = 'outfit-slot';
-      slot.innerHTML = '<img class="slot-img" src="' + item.src + '" alt="' + item.name + '"><div class="slot-info"><div class="slot-cat">' + cat + '</div><div class="slot-name">' + item.name + '</div></div><button class="slot-remove" onclick="removeSlot(\'' + cat + '\')">×</button>';
+      slot.className = 'outfit-slot card-enter';
+      slot.style.setProperty('--i', i);
+      slot.innerHTML = '<img class="slot-img" src="' + esc(item.src) + '" alt="' + esc(item.name) + '"><div class="slot-info"><div class="slot-cat">' + cat + '</div><div class="slot-name">' + esc(item.name) + '</div></div><button class="slot-remove" onclick="removeSlot(\'' + cat + '\')">×</button>';
       panel.appendChild(slot);
     });
   }
@@ -495,13 +578,14 @@ async function callGemini(prompt, imageBase64 = null, mimeType = null, imageUrls
   const body = { prompt };
   if (imageBase64) { body.imageBase64 = imageBase64; body.mimeType = mimeType; }
   if (imageUrls && imageUrls.length) { body.imageUrls = imageUrls; }
+  const token = await auth.currentUser?.getIdToken();
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
   let res;
   try {
     res = await fetch('/api/gemini', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
       body: JSON.stringify(body),
       signal: controller.signal
     });
@@ -555,13 +639,14 @@ async function compressImage(file, maxDim = 1500, quality = 0.85) {
 
 // TODO: AI
 async function removeBackground(imageBase64) {
+  const token = await auth.currentUser?.getIdToken();
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 20000);
   let res;
   try {
     res = await fetch('/api/removebg', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
       body: JSON.stringify({ imageBase64 }),
       signal: controller.signal
     });
@@ -639,6 +724,7 @@ document.getElementById('fileInput').addEventListener('change', async e => {
     console.error('Upload failed:', err?.code, err?.message, err);
     items = items.filter(i => i.id !== tempId);
     renderGrid();
+    showToast(t('toastUploadFail'));
   }
 });
 
@@ -673,7 +759,7 @@ renderVibeChips();
 
 // TODO: AI
 async function rateOutfit() {
-  const pieces = Object.values(outfit);
+  const pieces = resolveOutfitItems();
   if (pieces.length < 2) return;
   const fb = document.getElementById('feedbackBox');
   fb.style.display = 'block';
@@ -704,9 +790,9 @@ async function rateOutfit() {
     fb.className = 'feedback';
     if (match) {
       const rest = text.replace(/\d+\s*\/\s*10/, '').trim();
-      fb.innerHTML = '<span class="score">' + match[1] + '/10</span><span style="font-size:13px;line-height:1.65;">' + rest + '</span>';
+      fb.innerHTML = '<span class="score">' + match[1] + '/10</span><span style="font-size:13px;line-height:1.65;">' + esc(rest) + '</span>';
     } else {
-      fb.innerHTML = '<span style="font-size:13px;line-height:1.65;">' + text + '</span>';
+      fb.innerHTML = '<span style="font-size:13px;line-height:1.65;">' + esc(text) + '</span>';
     }
   } catch {
     fb.className = 'feedback';
@@ -794,6 +880,7 @@ document.getElementById('boardFileInput').addEventListener('change', async e => 
     await saveBoardSlot(index, url);
   } catch (err) {
     console.error('Board upload failed:', err?.code, err?.message, err);
+    showToast(t('toastBoardFail'));
     /* leave slot empty on error */
   }
   boardLoading.delete(index);
@@ -877,7 +964,7 @@ function addItem(item) {
 function removeItem(id) {
   items = items.filter(i => i.id !== id);
   for (const cat of Object.keys(outfit)) {
-    if (outfit[cat]?.id === id) delete outfit[cat];
+    if (outfit[cat] === id) delete outfit[cat];
   }
   save();
   renderGrid();
@@ -885,6 +972,10 @@ function removeItem(id) {
   if (currentUid) {
     deleteDoc(doc(db, 'users', currentUid, 'items', String(id)))
       .catch(err => console.error('Firestore delete failed:', err));
+    deleteObject(storageRef(storage, `users/${currentUid}/items/${id}`))
+      .catch(err => {
+        if (err?.code !== 'storage/object-not-found') console.error('Storage delete failed:', err);
+      });
   }
 }
 
@@ -892,7 +983,8 @@ async function loadWardrobe(uid) {
   wardrobeLoading = true;
   renderGrid();
   try {
-    const snap = await getDocs(query(collection(db, 'users', uid, 'items'), orderBy('id', 'asc')));
+    // Newest-first, matching the in-session order (new items are unshifted)
+    const snap = await getDocs(query(collection(db, 'users', uid, 'items'), orderBy('id', 'desc')));
     items = snap.docs.map(d => ({ ...d.data(), analyzing: false }));
     // One-time migration: move localStorage items to Firestore
     const legacy = JSON.parse(localStorage.getItem('marta_items') || '[]');
@@ -906,12 +998,22 @@ async function loadWardrobe(uid) {
       for (const item of newLegacy) {
         items.push({ id: item.id, src: item.src, name: item.name, category: item.category, analyzing: false });
       }
-      items.sort((a, b) => a.id - b.id);
+      items.sort((a, b) => b.id - a.id);
       localStorage.removeItem('marta_items');
     }
-  } catch (err) { console.error('Wardrobe load failed:', err); }
+    // Drop outfit selections that reference items deleted on another device
+    let pruned = false;
+    for (const cat of Object.keys(outfit)) {
+      if (!items.some(i => i.id === outfit[cat])) { delete outfit[cat]; pruned = true; }
+    }
+    if (pruned) save();
+  } catch (err) {
+    console.error('Wardrobe load failed:', err);
+    showToast(t('toastLoadFail'));
+  }
   wardrobeLoading = false;
   renderGrid();
+  updateRateBtn();
 }
 
 // ─── Style Profile data layer ────────────────────────────────────────────────
@@ -940,6 +1042,7 @@ async function addStyleImage(file) {
   } catch (err) {
     console.error('Style image upload failed:', err);
     styleProfile = styleProfile.filter(p => p.id !== id);
+    showToast(t('toastStyleFail'));
   }
   _renderProfileSlots('profileGrid');
   _renderProfileSlots('onbStyleGrid');
@@ -1036,6 +1139,13 @@ function renderToday() {
   if (!grid) return;
   grid.innerHTML = '';
   const n = items.length;
+  if (n === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'today-empty';
+    empty.innerHTML = EMPTY_ART.today;
+    grid.appendChild(empty);
+    return;
+  }
   for (let i = 0; i < 4; i++) {
     const cell = document.createElement('div');
     if (n > 0) {
