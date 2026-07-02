@@ -1,11 +1,11 @@
-// TODO: AI
-module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+const verifyFirebaseToken = require('./_auth.js');
 
+module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (!(await verifyFirebaseToken(req))) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
   const key = process.env.REMOVEBG_API_KEY;
   if (!key) return res.status(500).json({ error: 'Missing REMOVEBG_API_KEY' });
@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
       },
       body: new URLSearchParams({
         image_file_b64: imageBase64,
-        size: 'preview',
+        size: 'preview', // 'preview' (~0.25 MP) stays on the free tier; larger sizes bill credits
         format: 'png'
       })
     });
