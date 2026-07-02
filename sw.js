@@ -1,4 +1,4 @@
-const VERSION = 2;
+const VERSION = 3;
 const CACHE_NAME = `pintona-v${VERSION}`;
 
 // Assets that must be available offline from the first load

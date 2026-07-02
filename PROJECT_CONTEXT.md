@@ -63,8 +63,11 @@ feedback) must go through `esc()` before `innerHTML`.
 
 ## Known gaps / next candidates
 
-- Today tab is not actually AI (copy is honest about it); wiring Gemini suggestion is the
-  natural next feature (wardrobe + vibe + style profile → structured outfit JSON).
+- Today tab: Gemini picks an outfit of the day from the wardrobe using inspo images
+  (style profile + board), the active vibe, and local weather via Open-Meteo
+  (keyless, geolocation with graceful fallback). Cached per day in localStorage
+  `pintona_today_YYYY-MM-DD`; Shuffle regenerates. Weather/geo need
+  `geolocation=(self)` in Permissions-Policy and api.open-meteo.com in connect-src.
 - No outfit history / saved looks; rating feedback is overwritten each time.
 - remove.bg `size: 'preview'` caps item images at ~0.25 MP (free tier trade-off).
 - Icons are SVG-only; iOS home-screen prefers PNG apple-touch-icon.

@@ -40,6 +40,8 @@ export const translations = {
     todaySubtitle:  'Your daily look',
     todayAiNote:    'Picked from your wardrobe',
     todayShuffle:   'Shuffle',
+    todayLoading:   'Styling your day\u2026',
+    todayFail:      'Couldn\u2019t style today \u2014 showing your pieces instead.',
     // Language picker
     langChoose:     'Choose language',
     langEn:         'English',
@@ -109,6 +111,8 @@ export const translations = {
     todaySubtitle:  'Tu look de hoy',
     todayAiNote:    'Elegido de tu armario',
     todayShuffle:   'Mezclar',
+    todayLoading:   'Creando tu look\u2026',
+    todayFail:      'No se pudo crear el look de hoy \u2014 aqu\u00ed tienes tus prendas.',
     // Language picker
     langChoose:     'Elegir idioma',
     langEn:         'Inglés',
@@ -178,6 +182,8 @@ export const translations = {
     todaySubtitle:  'Trang phục hôm nay của bạn',
     todayAiNote:    'Được chọn từ tủ đồ của bạn',
     todayShuffle:   'Ngẫu nhiên',
+    todayLoading:   'Đang phối đồ cho bạn\u2026',
+    todayFail:      'Không thể phối đồ hôm nay \u2014 hiển thị đồ của bạn.',
     // Language picker
     langChoose:     'Chọn ngôn ngữ',
     langEn:         'Tiếng Anh',

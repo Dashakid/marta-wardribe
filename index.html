@@ -417,10 +417,10 @@
     <div class="today-header">
       <span class="today-title" data-i18n="todayTitle">Today</span>
       <span class="today-subtitle" data-i18n="todaySubtitle">Your daily look</span>
+      <span class="today-subtitle" id="todayWeather"></span>
     </div>
     <div class="today-grid" id="todayGrid"></div>
-    <!-- TODO: AI — replace with Gemini observation from board images + wardrobe items when AI integration is added -->
-    <p class="today-ai-note" data-i18n="todayAiNote">AI-powered suggestion</p>
+    <p class="today-ai-note" id="todayNote"></p>
     <button class="rate-btn" onclick="shuffleToday()" data-i18n="todayShuffle">Shuffle</button>
   </div>
 </div>
@@ -1143,42 +1143,126 @@ window.addEventListener('pintona:auth', ({ detail }) => {
   });
 });
 
-// ─── Today ──────────────────────────────────────────────────────────────────
-let todayOffset = 0;
+// ─── Today: AI-styled outfit of the day ─────────────────────────────────────
+// Gemini picks from the wardrobe using the inspo images (style profile + board),
+// the chosen vibe, and today's local weather (Open-Meteo, keyless). Cached per day.
+let todayBusy = false;
+const todayKey = () => 'pintona_today_' + new Date().toISOString().slice(0, 10);
 
-function renderToday() {
+async function getWeather() {
+  if (!('geolocation' in navigator)) return null;
+  try {
+    const pos = await new Promise((res, rej) =>
+      navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000, maximumAge: 600000 }));
+    const { latitude, longitude } = pos.coords;
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + latitude +
+      '&longitude=' + longitude +
+      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&forecast_days=1&timezone=auto');
+    if (!r.ok) return null;
+    const d = (await r.json()).daily;
+    return {
+      tMin: Math.round(d.temperature_2m_min[0]),
+      tMax: Math.round(d.temperature_2m_max[0]),
+      rain: d.precipitation_probability_max[0] ?? 0,
+      code: d.weather_code[0] ?? 0
+    };
+  } catch { return null; } // permission denied or offline — style without weather
+}
+
+function weatherLabel(w) {
+  if (!w) return '';
+  const icon = (w.code >= 71 && w.code <= 77) ? '❄️'
+    : (w.rain > 50 || w.code >= 51) ? '☔'
+    : (w.code <= 1) ? '☀️' : '⛅';
+  return icon + ' ' + w.tMin + '–' + w.tMax + '°C';
+}
+
+function renderTodayCells(list) {
   const grid = document.getElementById('todayGrid');
-  if (!grid) return;
   grid.innerHTML = '';
-  const n = items.length;
-  if (n === 0) {
+  list.slice(0, 6).forEach(item => {
+    const cell = document.createElement('div');
+    cell.className = 'today-cell card-enter';
+    const img = document.createElement('img');
+    img.src = item.src;
+    img.alt = item.name;
+    cell.appendChild(img);
+    grid.appendChild(cell);
+  });
+}
+
+function renderTodayPick(pick) {
+  renderTodayCells(pick.itemIds.map(id => items.find(i => i.id === id)).filter(Boolean));
+  const note = document.getElementById('todayNote');
+  if (note) note.textContent = pick.note || t('todayAiNote');
+  const weatherEl = document.getElementById('todayWeather');
+  if (weatherEl) weatherEl.textContent = pick.weather || '';
+}
+
+async function styleToday(force = false) {
+  const grid = document.getElementById('todayGrid');
+  const note = document.getElementById('todayNote');
+  if (!grid || todayBusy) return;
+  if (items.length === 0) {
+    grid.innerHTML = '';
     const empty = document.createElement('div');
     empty.className = 'today-empty';
     empty.innerHTML = EMPTY_ART.today;
     grid.appendChild(empty);
+    if (note) note.textContent = '';
     return;
   }
-  for (let i = 0; i < 4; i++) {
-    const cell = document.createElement('div');
-    if (n > 0) {
-      const item = items[(todayOffset + i) % n];
-      cell.className = 'today-cell';
-      const img = document.createElement('img');
-      img.src = item.src;
-      img.alt = item.name;
-      cell.appendChild(img);
-    } else {
-      cell.className = 'today-cell empty';
+  if (!force) {
+    const cached = JSON.parse(localStorage.getItem(todayKey()) || 'null');
+    if (cached?.itemIds?.some(id => items.some(i => i.id === id))) {
+      renderTodayPick(cached);
+      return;
     }
-    grid.appendChild(cell);
   }
+  todayBusy = true;
+  grid.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const ghost = document.createElement('div');
+    ghost.className = 'skeleton-card';
+    grid.appendChild(ghost);
+  }
+  if (note) note.textContent = t('todayLoading');
+  try {
+    const weather = await getWeather();
+    const vibe = (VIBES.find(v => v.key === activeVibe) || VIBES[0]).en;
+    const list = items.map(i => i.id + ': ' + i.category + ' — ' + i.name).join('\n');
+    const inspo = [
+      ...styleProfile.filter(p => p.src).map(p => ({ url: p.src })),
+      ...board.filter(Boolean).map(url => ({ url }))
+    ].slice(0, 6);
+    const langName = { en: 'English', es: 'Spanish', vi: 'Vietnamese' }[lang] || 'English';
+    const prompt =
+      (inspo.length ? 'The attached images are my style inspiration — match their mood.\n' : '') +
+      (weather ? "Today's weather: " + weather.tMin + '–' + weather.tMax + '°C, ' + weather.rain + '% chance of rain.\n' : '') +
+      'My preferred vibe: ' + vibe + '.\n' +
+      'My wardrobe, one item per line as "id: category — name":\n' + list + '\n\n' +
+      'Pick ONE outfit for today from my wardrobe: 2–5 items, at most one per category' +
+      (weather ? ', appropriate for the weather' : '') +
+      (force ? ', different from the obvious first choice' : '') +
+      '. Reply ONLY with JSON: {"itemIds":[...],"note":"one stylish sentence in ' + langName +
+      ' about why this works today"}. No markdown.';
+    const text = await callGemini(prompt, null, null, inspo, 30000);
+    const raw = JSON.parse(text.replace(/```json|```/g, '').trim());
+    const ids = (raw.itemIds || []).filter(id => items.some(i => i.id === id)).slice(0, 5);
+    if (!ids.length) throw new Error('no valid items in suggestion');
+    const pick = { itemIds: ids, note: String(raw.note || ''), weather: weatherLabel(weather) };
+    localStorage.setItem(todayKey(), JSON.stringify(pick));
+    renderTodayPick(pick);
+  } catch (err) {
+    console.error('Today styling failed:', err?.message, err);
+    renderTodayCells(items.slice(0, 4));
+    if (note) note.textContent = t('todayFail');
+  }
+  todayBusy = false;
 }
 
-function shuffleToday() {
-  if (items.length === 0) return;
-  todayOffset = (todayOffset + 1) % items.length;
-  renderToday();
-}
+function renderToday() { styleToday(false); }
+function shuffleToday() { styleToday(true); }
 
 // ─── Service Worker Registration ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {
