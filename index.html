@@ -216,15 +216,27 @@
       ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.18s; }
     }
 </style>
+  <!-- Official Firebase CDN bundles: esm.sh resolves @firebase/* internals loosely,
+       which broke auth registration when a newer internal package was published. -->
   <script type="importmap">
   {
     "imports": {
-      "firebase/app":       "https://esm.sh/firebase@12.13.0/app",
-      "firebase/auth":      "https://esm.sh/firebase@12.13.0/auth",
-      "firebase/firestore": "https://esm.sh/firebase@12.13.0/firestore",
-      "firebase/storage":   "https://esm.sh/firebase@12.13.0/storage"
+      "firebase/app":       "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js",
+      "firebase/auth":      "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js",
+      "firebase/storage":   "https://www.gstatic.com/firebasejs/12.13.0/firebase-storage.js"
     }
   }
+  </script>
+  <script>
+    // Standalone fallback so a CDN/module failure can never trap users on the
+    // language screen; the app module overrides these once it loads.
+    window.chooseLang = function (l) {
+      localStorage.setItem('pintona_lang', l);
+      var s = document.getElementById('lang-screen');
+      if (s) s.hidden = true;
+    };
+    window.pickLang = window.chooseLang;
   </script>
 </head>
 <body>

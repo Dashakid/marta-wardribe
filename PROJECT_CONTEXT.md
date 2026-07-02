@@ -14,7 +14,9 @@ tuned by a chosen "vibe" and personal style-reference photos. UI in en / es / vi
 ## Architecture
 
 ```
-Browser (index.html — all CSS + JS inline, ES modules via esm.sh importmap)
+Browser (index.html — all CSS + JS inline, ES modules via importmap → www.gstatic.com
+Firebase CDN bundles; do NOT switch back to esm.sh, its loose @firebase/* resolution
+broke auth registration in production)
  ├─ firebase.js        Auth (Google popup), exports auth/db/storage/currentUid,
  │                     dispatches window event 'pintona:auth' on sign-in
  ├─ i18n.js            translations {en,es,vi}, t()/lang/setLang, localStorage pintona_lang
